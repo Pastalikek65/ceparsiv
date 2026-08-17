@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Hesap — CepArsiv{% endblock %}
+
+{% block content %}
+<article>
+  <h2>Hoş geldin, {{ user.username }}</h2>
+  <p>Arşiv yönetimi bu sayfaya eklenecek.</p>
+  <form method="post" action="/logout">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">Çıkış yap</button>
+  </form>
+</article>
+{% endblock %}
