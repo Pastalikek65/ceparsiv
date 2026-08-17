@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -54,6 +55,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="CepArsiv", debug=settings.debug, lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static"), check_dir=False), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.include_router(web_auth.router)

@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from sqlmodel import Session
 
 from cepearsiv.deps import get_api_user, get_session
-from cepearsiv.schemas import ItemCreate, ItemOut, ItemUpdate, SearchOut, TagOut
+from cepearsiv.schemas import ClipperCreate, ItemCreate, ItemOut, ItemUpdate, SearchOut, TagOut
 from cepearsiv.services.items import (
     create_item,
     decode_cursor,
     encode_cursor,
     get_item,
+    get_or_create_bookmark_by_url,
     list_items,
     toggle_flag,
     update_item,
@@ -163,3 +165,19 @@ def api_tags(
 ):
     rows = tags_with_counts(session, user.id)
     return {"tags": [TagOut(name=tag.name, count=count) for tag, count in rows]}
+
+
+@router.post("/clipper")
+def api_clipper(
+    request: Request,
+    data: ClipperCreate,
+    session: Session = Depends(get_session),
+    user=Depends(get_api_user),
+):
+    item, created = get_or_create_bookmark_by_url(
+        session, user.id, data.url, data.title, data.selection
+    )
+    response_model = _item_out(session, user.id, item)
+    if created:
+        return JSONResponse(status_code=201, content=response_model.model_dump(mode="json"))
+    return response_model.model_dump(mode="json")

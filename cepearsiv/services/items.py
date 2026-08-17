@@ -124,6 +124,25 @@ def restore_item(session: Session, user_id: int, item_id: int) -> Item:
     return item
 
 
+def get_or_create_bookmark_by_url(
+    session: Session, user_id: int, url: str, title: str | None, selection: str
+) -> tuple[Item, bool]:
+    existing = session.exec(
+        select(Item).where(
+            Item.user_id == user_id, Item.url == url, Item.is_deleted == False
+        )
+    ).first()
+    if existing is not None:
+        return existing, False
+    data = ItemCreate(
+        type="bookmark",
+        title=(title or url).strip() or url,
+        body=selection,
+        url=url,
+    )
+    return create_item(session, user_id, data), True
+
+
 def encode_cursor(created_at: datetime, item_id: int) -> str:
     payload = f"{created_at.isoformat()}|{item_id}".encode()
     return base64.urlsafe_b64encode(payload).decode()

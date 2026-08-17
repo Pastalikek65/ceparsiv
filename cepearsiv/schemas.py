@@ -17,6 +17,12 @@ class ItemCreate(BaseModel):
         return self
 
 
+class ClipperCreate(BaseModel):
+    title: str | None = Field(default=None, max_length=200)
+    url: str = Field(min_length=1)
+    selection: str = Field(default="")
+
+
 class ItemUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     body: str | None = None
