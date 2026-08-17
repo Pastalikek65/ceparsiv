@@ -1,14 +1,16 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlmodel import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from cepearsiv.config import settings
+from cepearsiv.deps import get_current_user, get_session
 from cepearsiv.routers import (
     api_tokens,
     api_v1,
@@ -80,8 +82,9 @@ def healthz() -> dict:
 
 
 @app.get("/")
-def home(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+def home(request: Request, session: Session = Depends(get_session)):
+    user = get_current_user(request, session)
+    return templates.TemplateResponse(request, "index.html", {"user": user})
 
 
 @app.exception_handler(StarletteHTTPException)

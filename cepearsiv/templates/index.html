@@ -6,6 +6,10 @@
 <article>
   <h1>CepArsiv - Kişisel Bilgi Arşivi</h1>
   <p>Notlar, yer imleri ve kod parçacıkları tek bir hafif arşivde.</p>
-  <p><small>Giriş ve arşiv özellikleri yakında.</small></p>
+  {% if user %}
+  <p><a href="/items" role="button">Arşive git</a></p>
+  {% else %}
+  <p><a href="/login" role="button">Giriş</a> <a href="/register" role="button" class="secondary">Kayıt ol</a></p>
+  {% endif %}
 </article>
 {% endblock %}

@@ -9,6 +9,26 @@
 <body>
   <main class="container">
     {% set csrf_val = (csrf_token if csrf_token is defined else "") or request.cookies.get("csrf_token") %}
+    <nav style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+      <strong><a href="/" style="text-decoration:none;">CepArsiv</a></strong>
+      {% if user %}
+      <a href="/items">Arşiv</a>
+      <a href="/items/new">Yeni</a>
+      <a href="/search">Arama</a>
+      <a href="/tags">Etiketler</a>
+      <a href="/settings/data">Veri</a>
+      <span style="flex:1"></span>
+      <a href="/account">{{ user.username }}</a>
+      <form method="post" action="/logout" style="display:inline;margin:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_val }}">
+        <button type="submit" class="outline contrast" style="margin:0;">Çıkış</button>
+      </form>
+      {% else %}
+      <span style="flex:1"></span>
+      <a href="/login">Giriş</a>
+      <a href="/register">Kayıt</a>
+      {% endif %}
+    </nav>
     {% if csrf_val %}
     <nav class="theme-toggle" style="display:flex;gap:.5rem;justify-content:flex-end;">
       {% for value in ("light", "dark", "auto") %}
