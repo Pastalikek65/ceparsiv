@@ -26,6 +26,6 @@
 | V2-A | Tag yeniden adlandırma ve birleştirme, çakışmada 422 | tamamlandı |
 | V2-B | Cursor pagination: item listesi web ve API'de `cursor`/`next_cursor`, OFFSET kaldırıldı | tamamlandı |
 | V2-B | Trigram tokenizer (SQLite ≥3.34): alt dize + Türkçe FTS5 arama, kısa sorgularda LIKE fallback | tamamlandı |
-| V2-C | Paylaşılabilir tekil link | planlandı |
-| V2-C | Web clipper bookmarklet | planlandı |
+| V2-C | Paylaşılabilir tekil link: `/share/<token>`, salt okunur, sahibi silebilir | tamamlandı |
+| V2-C | Web clipper bookmarklet: `POST /api/v1/clipper`, duplicate URL dedupe, CORS preflight | tamamlandı |
 | V2-D | İki faktörlü auth (opsiyonel) | planlandı |
