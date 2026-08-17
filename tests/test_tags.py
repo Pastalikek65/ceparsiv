@@ -82,3 +82,110 @@ def test_tags_with_counts(db_session):
         (tag.name, count) for tag, count in tags_with_counts(db_session, user.id)
     )
     assert result == [("django", 1), ("python", 2)]
+
+
+def test_rename_tag(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    user = make_user(db_session, username="renamer")
+    (tag,) = get_or_create_tags(db_session, user.id, ["python"])
+    item = create_item(db_session, user.id, ItemCreate(type="note", title="Ad Degisti"))
+    set_item_tags(db_session, user.id, item.id, ["python"])
+    renamed = rename_tag(db_session, user.id, tag.id, "py")
+    assert renamed.name == "py"
+    names = [t.name for t in get_item_tags(db_session, user.id, item.id)]
+    assert names == ["py"]
+
+
+def test_rename_tag_normalizes_input(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    user = make_user(db_session, username="renamer2")
+    (tag,) = get_or_create_tags(db_session, user.id, ["python"])
+    renamed = rename_tag(db_session, user.id, tag.id, "  Pythonista ")
+    assert renamed.name == "pythonista"
+
+
+def test_rename_to_same_name_is_noop(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    user = make_user(db_session, username="renamer3")
+    (tag,) = get_or_create_tags(db_session, user.id, ["python"])
+    renamed = rename_tag(db_session, user.id, tag.id, "PYTHON")
+    assert renamed.name == "python"
+
+
+def test_rename_tag_conflict_raises(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    user = make_user(db_session, username="conflict")
+    (tag,) = get_or_create_tags(db_session, user.id, ["python"])
+    get_or_create_tags(db_session, user.id, ["py"])
+    with pytest.raises(ValueError):
+        rename_tag(db_session, user.id, tag.id, "py")
+
+
+def test_rename_tag_missing_raises(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    user = make_user(db_session, username="ghost")
+    with pytest.raises(ValueError):
+        rename_tag(db_session, user.id, 99999, "hayalet")
+
+
+def test_rename_tag_other_user_raises(db_session):
+    from cepearsiv.services.tags import rename_tag
+
+    a = make_user(db_session, username="usrA")
+    b = make_user(db_session, username="usrB")
+    (tag,) = get_or_create_tags(db_session, a.id, ["python"])
+    with pytest.raises(ValueError):
+        rename_tag(db_session, b.id, tag.id, "py")
+
+
+def test_merge_tags_moves_links(db_session):
+    from cepearsiv.services.tags import merge_tags
+
+    user = make_user(db_session, username="merger")
+    (src,) = get_or_create_tags(db_session, user.id, ["django"])
+    (dst,) = get_or_create_tags(db_session, user.id, ["python"])
+    i1 = create_item(db_session, user.id, ItemCreate(type="note", title="Bir"))
+    i2 = create_item(db_session, user.id, ItemCreate(type="note", title="Iki"))
+    set_item_tags(db_session, user.id, i1.id, ["django"])
+    set_item_tags(db_session, user.id, i2.id, ["django", "python"])
+    merge_tags(db_session, user.id, src.id, dst.id)
+    names1 = [t.name for t in get_item_tags(db_session, user.id, i1.id)]
+    names2 = [t.name for t in get_item_tags(db_session, user.id, i2.id)]
+    assert names1 == ["python"]
+    assert names2 == ["python"]
+    counts = [(t.name, c) for t, c in tags_with_counts(db_session, user.id)]
+    assert counts == [("python", 2)]
+
+
+def test_merge_tags_same_id_raises(db_session):
+    from cepearsiv.services.tags import merge_tags
+
+    user = make_user(db_session, username="selfmerge")
+    (tag,) = get_or_create_tags(db_session, user.id, ["python"])
+    with pytest.raises(ValueError):
+        merge_tags(db_session, user.id, tag.id, tag.id)
+
+
+def test_merge_tags_missing_source_raises(db_session):
+    from cepearsiv.services.tags import merge_tags
+
+    user = make_user(db_session, username="missingmerge")
+    (dst,) = get_or_create_tags(db_session, user.id, ["python"])
+    with pytest.raises(ValueError):
+        merge_tags(db_session, user.id, 99999, dst.id)
+
+
+def test_merge_tags_other_user_raises(db_session):
+    from cepearsiv.services.tags import merge_tags
+
+    a = make_user(db_session, username="mergeA")
+    b = make_user(db_session, username="mergeB")
+    (src,) = get_or_create_tags(db_session, a.id, ["django"])
+    (dst,) = get_or_create_tags(db_session, a.id, ["python"])
+    with pytest.raises(ValueError):
+        merge_tags(db_session, b.id, src.id, dst.id)

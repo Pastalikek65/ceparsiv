@@ -7,16 +7,41 @@
   <h2>Etiketler</h2>
 </header>
 
+{% if error is defined and error %}
+<p style="color:var(--color-error);">Hata: {{ error }}</p>
+{% endif %}
+
 {% if tags %}
 <table>
   <thead>
-    <tr><th>Etiket</th><th>Öğe sayısı</th></tr>
+    <tr><th>Etiket</th><th>Öğe</th><th>Yeniden adlandır</th><th>Buna birleştir</th></tr>
   </thead>
   <tbody>
     {% for tag, count in tags %}
     <tr>
       <td><a href="/items?tag={{ tag.name }}">{{ tag.name }}</a></td>
       <td>{{ count }}</td>
+      <td>
+        <form method="post" action="/tags/{{ tag.id }}/rename" style="display:flex;gap:.3rem;margin:0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="text" name="name" value="{{ tag.name }}" aria-label="Yeni ad" style="margin:0;">
+          <button type="submit" class="secondary">Değiştir</button>
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/tags/{{ tag.id }}/merge" style="display:flex;gap:.3rem;margin:0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <select name="target_id" aria-label="Hedef etiket" style="margin:0;">
+            <option value="" selected disabled>hedef seç</option>
+            {% for other, _ in tags %}
+            {% if other.id != tag.id %}
+            <option value="{{ other.id }}">{{ other.name }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+          <button type="submit" class="contrast">Birleştir</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
