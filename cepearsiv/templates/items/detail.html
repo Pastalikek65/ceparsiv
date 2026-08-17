@@ -24,7 +24,7 @@
   <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
   {% endif %}
 
-  <p style="white-space:pre-wrap;">{{ item.body }}</p>
+  <div class="md-body">{{ rendered_body|safe }}</div>
 
   <footer>
     <small>

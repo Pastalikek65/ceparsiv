@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from sqlmodel import Session
 
 from cepearsiv.deps import fix_form_value, get_current_user, get_session
+from cepearsiv.markdownx import render_markdown
 from cepearsiv.schemas import ItemCreate
 from cepearsiv.security import generate_csrf_token
 from cepearsiv.services.items import (
@@ -187,8 +188,14 @@ def items_detail(request: Request, item_id: int, session: Session = Depends(get_
     if item is None:
         return _csrf_response(request, "items/not_found.html", status_code=404, user=user)
     item_tags = get_item_tags(session, user.id, item.id)
+    rendered_body = render_markdown(item.body)
     return _csrf_response(
-        request, "items/detail.html", user=user, item=item, item_tags=item_tags
+        request,
+        "items/detail.html",
+        user=user,
+        item=item,
+        item_tags=item_tags,
+        rendered_body=rendered_body,
     )
 
 
