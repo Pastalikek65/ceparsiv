@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}500 — CepArsiv{% endblock %}
+
+{% block content %}
+<article>
+  <h2>500 - Sunucu Hatası</h2>
+  <p>Beklenmedik bir sorun oluştu. Lütfen daha sonra tekrar deneyin.</p>
+  {% if detail %}
+  <hr>
+  <pre style="white-space:pre-wrap;">{{ detail }}</pre>
+  {% endif %}
+  <p><a href="/" role="button" class="secondary">Ana sayfaya dön</a></p>
+</article>
+{% endblock %}

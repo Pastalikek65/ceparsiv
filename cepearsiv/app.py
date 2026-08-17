@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from cepearsiv.config import settings
 from cepearsiv.routers import (
@@ -71,3 +73,32 @@ def healthz() -> dict:
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse(request, "index.html")
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=exc.status_code, content={"detail": str(exc.detail)}
+        )
+    if exc.status_code in (404, 500):
+        template_name = "errors/404.html" if exc.status_code == 404 else "errors/500.html"
+        return templates.TemplateResponse(
+            request,
+            template_name,
+            {"debug": settings.debug, "detail": str(exc.detail) if settings.debug else ""},
+            status_code=exc.status_code,
+        )
+    return JSONResponse(status_code=exc.status_code, content={"detail": str(exc.detail)})
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(status_code=500, content={"detail": "sunucu hatasi"})
+    return templates.TemplateResponse(
+        request,
+        "errors/500.html",
+        {"debug": settings.debug, "detail": repr(exc) if settings.debug else ""},
+        status_code=500,
+    )
