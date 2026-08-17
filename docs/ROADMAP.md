@@ -18,7 +18,7 @@
 | E2 | JSON export/import, audit log, `scripts/backup.py` |
 | E3 | Sertleştirme: 404/500 sayfaları, README, dokümanlar, pin'li bağımlılıklar |
 
-## V2 — devam ediyor
+## V2 — tamamlandı
 
 | Faz | Kapsam | Durum |
 |---|---|---|
@@ -28,4 +28,4 @@
 | V2-B | Trigram tokenizer (SQLite ≥3.34): alt dize + Türkçe FTS5 arama, kısa sorgularda LIKE fallback | tamamlandı |
 | V2-C | Paylaşılabilir tekil link: `/share/<token>`, salt okunur, sahibi silebilir | tamamlandı |
 | V2-C | Web clipper bookmarklet: `POST /api/v1/clipper`, duplicate URL dedupe, CORS preflight | tamamlandı |
-| V2-D | İki faktörlü auth (opsiyonel) | planlandı |
+| V2-D | İki faktörlü auth: TOTP + SVG QR + 10 hash'lenmiş yedek kod | tamamlandı |

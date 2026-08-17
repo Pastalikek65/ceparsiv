@@ -35,6 +35,15 @@ CepArsiv tek kullanıcı varsayımıyla, düşük kaynaklı (proot Ubuntu) bir o
 - Tüm sorgular SQLAlchemy parametreli sorgularıyla gider.
 - FTS5 MATCH query builder, özel karakterleri temizler; LIKE fallback ise `%`, `_`, `\` kaçışlanır. Ham kullanıcı girdisi SQL içine string birleştirmeyle konmaz.
 
+## İki faktörlü auth (TOTP)
+
+- Kullanıcı başına opsiyonel; `/settings/2fa` üzerinden etkinleştirilir.
+- TOTP: RFC 6238, 30 sn adım, `valid_window=1` (±30 sn saat kayması toleransı). Sır DB'de düz metin saklanır (TOTP doğası gereği sunucunun sırrı bilmesi gerekir).
+- Etkinleştirme iki adımda: sır oluşturulur → kullanıcı QR'ı tarar → kod doğrulanmadan `otp_enabled` açılmaz.
+- 10 yedek kod üretilir, DB'de yalnızca SHA-256 hash'i saklanır; her biri tek kullanımlık, kullanıldığı an işaretlenir. Yedek kodlar yalnızca etkinleştirme ekranında bir kez gösterilir.
+- 2FA girişi: şifre doğruysa geçici, 5 dk ömürlü HttpOnly bilet verilir; kod doğrulanana kadar oturum açılmaz. Bilet tek kullanımlık, in-memory (tek worker varsayımı).
+- Devre dışı bırakma şifre + güncel kod (veya yedek kod) gerektirir; sır ve tüm yedek kodlar silinir.
+
 ## Kaba kuvvet koruması
 
 - Login: kullanıcı + IP başına 5 deneme / 5 dakika, aşılırsa `429`.
