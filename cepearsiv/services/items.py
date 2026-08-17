@@ -69,6 +69,20 @@ def get_item(session: Session, user_id: int, item_id: int) -> Item | None:
     ).first()
 
 
+def update_item(session: Session, user_id: int, item_id: int, data) -> Item:
+    item = get_item(session, user_id, item_id)
+    if item is None:
+        raise ValueError("item bulunamadi")
+    fields = data.model_dump(exclude_unset=True)
+    for field, value in fields.items():
+        setattr(item, field, value)
+    item.updated_at = utcnow()
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
+
+
 def toggle_flag(
     session: Session,
     user_id: int,
