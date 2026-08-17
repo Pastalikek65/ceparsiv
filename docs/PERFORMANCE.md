@@ -20,11 +20,12 @@ Her bağlantıda PRAGMA olarak ayarlanır (`cepearsiv/db.py`):
 
 ## Sayfalama
 
-- `COUNT(*)` sorgusu yok: `LIMIT page_size + 1` ile çekilir, satır sayısı `page_size`'ı aşıyorsa `has_next = true` (`cepearsiv/services/items.py:151`).
+- **Item listesi** cursor tabanlı (`?cursor=...`, `created_at DESC, id DESC` seek koşulu); OFFSET yok, sayfa derinliği maliyeti sabit. Arama sonuçları hâlâ offset kullanır (`cepearsiv/services/items.py`).
+- `COUNT(*)` sorgusu yok: `LIMIT page_size + 1` ile çekilir, satır sayısı `page_size`'ı aşıyorsa `has_next = true`.
 
 ## Arama
 
-- FTS5 kullanılabilirse tam metin araması; değilse escape'li LIKE fallback (`cepearsiv/services/search.py`).
+- FTS5 kullanılabilirse tam metin araması; trigram tokenizer destekleniyorsa (SQLite ≥ 3.34) alt dize + Türkçe arama etkin, sorgu 3 karakterden kısaysa LIKE+casefold fallback (`cepearsiv/services/search.py`).
 - FTS5 index'i taban tablolarla trigger'lar üzerinden senkron kalır; import sonrası rebuild edilir.
 
 ## Statikler

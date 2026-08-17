@@ -14,7 +14,7 @@ Token, web arayüzündeki `/settings/tokens` sayfasından oluşturulur. Ham toke
 
 | Method | Yol | Açıklama | Parametreler |
 |---|---|---|---|
-| GET | `/api/v1/items` | Item listesi | `type`, `tag`, `favorite`, `archived`, `deleted`, `page`, `limit` |
+| GET | `/api/v1/items` | Item listesi | `type`, `tag`, `favorite`, `archived`, `deleted`, `page`, `limit`, `cursor` |
 | POST | `/api/v1/items` | Item oluştur (201) | body: `ItemCreate` |
 | GET | `/api/v1/items/{id}` | Item detayı | — |
 | PATCH | `/api/v1/items/{id}` | Item güncelle | body: `ItemUpdate` |
@@ -23,6 +23,8 @@ Token, web arayüzündeki `/settings/tokens` sayfasından oluşturulur. Ham toke
 | GET | `/api/v1/tags` | Tag listesi + sayılar | — |
 
 `page` varsayılanı 1, `limit` varsayılanı 20, üst sınırı 100. `type`: `note`, `bookmark`, `snippet`.
+
+Item listesi cursor tabanlı sayfalamayı da destekler. Yanıttaki `next_cursor` değerini bir sonraki isteğe `?cursor=...` olarak verin; `cursor` verilirse `page` yok sayılır. Geçersiz cursor `422` döner.
 
 ## Şemalar
 
@@ -48,7 +50,7 @@ Item çıktısı:
 
 ## Yanıt formatları
 
-- Liste: `{"items": [...], "has_next": true, "page": 1}`
+- Liste: `{"items": [...], "has_next": true, "page": 1, "next_cursor": "..."}`
 - Arama: `{"items": [...], "has_next": true}`
 - Tagler: `{"tags": [{"name": "...", "count": 3}]}`
 - Silme: `{"detail": "deleted"}`

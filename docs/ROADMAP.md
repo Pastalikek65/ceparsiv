@@ -24,8 +24,8 @@
 |---|---|---|
 | V2-A | Dark mode (tema çerezi, auto/dark/light) | tamamlandı |
 | V2-A | Tag yeniden adlandırma ve birleştirme, çakışmada 422 | tamamlandı |
-| V2-B | Cursor pagination (offset yerine) | planlandı |
-| V2-B | Trigram tokenizer ile Türkçe FTS5 iyileştirme | planlandı |
+| V2-B | Cursor pagination: item listesi web ve API'de `cursor`/`next_cursor`, OFFSET kaldırıldı | tamamlandı |
+| V2-B | Trigram tokenizer (SQLite ≥3.34): alt dize + Türkçe FTS5 arama, kısa sorgularda LIKE fallback | tamamlandı |
 | V2-C | Paylaşılabilir tekil link | planlandı |
 | V2-C | Web clipper bookmarklet | planlandı |
 | V2-D | İki faktörlü auth (opsiyonel) | planlandı |
