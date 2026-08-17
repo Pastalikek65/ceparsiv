@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Yedek Kodlar — CepArsiv{% endblock %}
+
+{% block content %}
+<article style="max-width:480px;margin:2rem auto;">
+  <h2>Yedek kodlar</h2>
+  <p><strong>Bu kodları şimdi kaydedin.</strong> Her biri tek kullanımlıktır; telefonunuzu kaybederseniz giriş için tek yolunuz bunlar. Bu sayfadan çıktıktan sonra bir daha gösterilmeyecekler.</p>
+  <ul>
+    {% for code in backup_codes %}
+    <li><code>{{ code }}</code></li>
+    {% endfor %}
+  </ul>
+  <p>2FA artık etkin. Bundan sonra girişte kod istenecek.</p>
+  <p><a href="/account" role="button">Anladım, hesaba dön</a></p>
+</article>
+{% endblock %}

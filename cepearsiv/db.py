@@ -94,7 +94,18 @@ def init_schema(engine: Engine) -> None:
     from cepearsiv import models
 
     SQLModel.metadata.create_all(engine)
+    _upgrade_users_columns(engine)
     _ensure_fts(engine)
+
+
+def _upgrade_users_columns(engine: Engine) -> None:
+    with engine.begin() as conn:
+        rows = conn.execute(text("PRAGMA table_info(users)")).all()
+        names = {row[1] for row in rows}
+        if "otp_secret" not in names:
+            conn.execute(text("ALTER TABLE users ADD COLUMN otp_secret VARCHAR"))
+        if "otp_enabled" not in names:
+            conn.execute(text("ALTER TABLE users ADD COLUMN otp_enabled BOOLEAN NOT NULL DEFAULT 0"))
 
 
 def get_session(engine: Engine) -> Iterator[Session]:

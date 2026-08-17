@@ -5,7 +5,7 @@
 {% block content %}
 <article>
   <h2>Hoş geldin, {{ user.username }}</h2>
-  <p>Arşiv yönetimi bu sayfaya eklenecek.</p>
+  <p><a href="/settings/2fa">İki faktörlü auth ayarları</a> · <a href="/settings/tokens">API token'lar</a> · <a href="/settings/audit">Audit log</a></p>
   <form method="post" action="/logout">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit">Çıkış yap</button>

@@ -15,6 +15,8 @@ class User(SQLModel, table=True):
     username: str = Field(index=True, unique=True)
     password_hash: str
     created_at: datetime = Field(default_factory=utcnow)
+    otp_secret: Optional[str] = Field(default=None)
+    otp_enabled: bool = Field(default=False)
 
 
 class UserSession(SQLModel, table=True):
@@ -100,4 +102,13 @@ class ShareToken(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id")
     item_id: int = Field(foreign_key="items.id", unique=True)
     token: str = Field(index=True, unique=True)
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class BackupCode(SQLModel, table=True):
+    __tablename__ = "backup_codes"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id")
+    code_hash: str
+    used_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=utcnow)

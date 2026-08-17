@@ -20,10 +20,12 @@ pluggy==1.6.0
 pydantic==2.13.4
 pydantic_core==2.46.4
 Pygments==2.21.0
+PyOTP==2.10.0
 pytest==9.1.1
 python-dotenv==1.2.3
 python-multipart==0.0.32
 PyYAML==6.0.3
+qrcode==8.2
 SQLAlchemy==2.0.52
 sqlmodel==0.0.39
 starlette==1.6.0
