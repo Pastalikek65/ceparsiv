@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} — CepArsiv{% endblock %}
+
+{% block content %}
+<article>
+  <header>
+    <h2>{{ item.title }}</h2>
+    <small>{{ item.type }}</small>
+  </header>
+
+  {% if item_tags %}
+  <p>
+    {% for tag in item_tags %}
+    <span class="secondary">{{ tag.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  {% if item.url %}
+  <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
+  {% endif %}
+
+  <div class="md-body">{{ rendered_body|safe }}</div>
+
+  <footer>
+    <small>
+      Oluşturuldu: {{ item.created_at.strftime("%Y-%m-%d %H:%M") }} ·
+      Güncellendi: {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}
+    </small>
+  </footer>
+</article>
+
+<p style="margin-top:1rem;"><small>CepArsiv üzerinde paylaşıldı.</small></p>
+{% endblock %}

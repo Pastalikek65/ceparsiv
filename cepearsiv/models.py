@@ -92,3 +92,12 @@ class AuditLog(SQLModel, table=True):
     __table_args__ = (
         Index("ix_audit_user_created", "user_id", text("created_at DESC")),
     )
+
+
+class ShareToken(SQLModel, table=True):
+    __tablename__ = "share_tokens"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id")
+    item_id: int = Field(foreign_key="items.id", unique=True)
+    token: str = Field(index=True, unique=True)
+    created_at: datetime = Field(default_factory=utcnow)

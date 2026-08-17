@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from cepearsiv.deps import fix_form_value, get_current_user, get_session
 from cepearsiv.markdownx import render_markdown
+from cepearsiv.models import ShareToken
 from cepearsiv.schemas import ItemCreate
 from cepearsiv.security import generate_csrf_token
 from cepearsiv.services.items import (
@@ -200,6 +201,15 @@ def items_detail(request: Request, item_id: int, session: Session = Depends(get_
         return _csrf_response(request, "items/not_found.html", status_code=404, user=user)
     item_tags = get_item_tags(session, user.id, item.id)
     rendered_body = render_markdown(item.body)
+    share_url = None
+    if not item.is_deleted:
+        existing = session.exec(
+            select(ShareToken).where(
+                ShareToken.item_id == item.id, ShareToken.user_id == user.id
+            )
+        ).first()
+        if existing is not None:
+            share_url = f"/share/{existing.token}"
     return _csrf_response(
         request,
         "items/detail.html",
@@ -207,6 +217,7 @@ def items_detail(request: Request, item_id: int, session: Session = Depends(get_
         item=item,
         item_tags=item_tags,
         rendered_body=rendered_body,
+        share_url=share_url,
     )
 
 

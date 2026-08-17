@@ -34,6 +34,21 @@
   </footer>
 </article>
 
+<div style="margin-top:.5rem;border:1px solid var(--muted-border-color);border-radius:var(--border-radius);padding:.5rem .75rem;">
+  {% if share_url %}
+  <p style="margin:0 0 .25rem;"><small><strong>Paylaşım bağlantısı:</strong> <a href="{{ share_url }}">{{ share_url }}</a></small></p>
+  <form method="post" action="/items/{{ item.id }}/share/delete" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="secondary">Bağlantıyı kaldır</button>
+  </form>
+  {% else %}
+  <form method="post" action="/items/{{ item.id }}/share" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="secondary">Paylaşım bağlantısı oluştur</button>
+  </form>
+  {% endif %}
+</div>
+
 <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem;">
   {% if not item.is_deleted %}
   <form method="post" action="/items/{{ item.id }}/toggle/favorite" style="margin:0;">
