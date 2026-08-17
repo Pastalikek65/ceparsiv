@@ -30,3 +30,14 @@ def get_current_user(request: Request, session: Session = Depends(get_session)) 
 
 def get_optional_current_user(request: Request, session: Session = Depends(get_session)) -> User | None:
     return get_current_user(request, session)
+
+
+def fix_form_value(value: str) -> str:
+    try:
+        return value.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return value
+
+
+def fix_form_encoding(form_data: dict[str, str]) -> dict[str, str]:
+    return {key: fix_form_value(value) for key, value in form_data.items()}

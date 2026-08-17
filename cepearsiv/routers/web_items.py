@@ -1,6 +1,5 @@
 import hmac
 from pathlib import Path
-from typing import Literal
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
@@ -8,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from sqlmodel import Session
 
-from cepearsiv.deps import get_current_user, get_session
+from cepearsiv.deps import fix_form_value, get_current_user, get_session
 from cepearsiv.schemas import ItemCreate
 from cepearsiv.security import generate_csrf_token
 from cepearsiv.services.items import (
@@ -18,6 +17,7 @@ from cepearsiv.services.items import (
     restore_item,
     toggle_flag,
 )
+from cepearsiv.services.tags import get_item_tags, set_item_tags
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -44,6 +44,7 @@ def _csrf_response(request: Request, template: str, status_code: int = 200, **co
 
 def _parse_filters(request: Request):
     item_type = request.query_params.get("type") or None
+    tag = request.query_params.get("tag") or None
     favorite = request.query_params.get("favorite") == "1" or None
     archived = request.query_params.get("archived") == "1" or None
     deleted = request.query_params.get("deleted") == "1"
@@ -51,7 +52,7 @@ def _parse_filters(request: Request):
         page = max(int(request.query_params.get("page", "1")), 1)
     except ValueError:
         page = 1
-    return item_type, favorite, archived, deleted, page
+    return item_type, tag, favorite, archived, deleted, page
 
 
 @router.get("/items")
@@ -59,11 +60,12 @@ def items_list(request: Request, session: Session = Depends(get_session)):
     user = get_current_user(request, session)
     if user is None:
         return RedirectResponse("/login", status_code=302)
-    item_type, favorite, archived, deleted, page = _parse_filters(request)
+    item_type, tag, favorite, archived, deleted, page = _parse_filters(request)
     items, has_next = list_items(
         session,
         user.id,
         type=item_type,
+        tag=tag,
         favorite=favorite,
         archived=archived,
         deleted=deleted,
@@ -72,6 +74,8 @@ def items_list(request: Request, session: Session = Depends(get_session)):
     params = []
     if item_type:
         params.append(f"type={item_type}")
+    if tag:
+        params.append(f"tag={tag}")
     if favorite:
         params.append("favorite=1")
     if archived:
@@ -92,6 +96,7 @@ def items_list(request: Request, session: Session = Depends(get_session)):
         next_query=f"{base_query}page={page + 1}" if has_next else None,
         filters={
             "type": item_type or "",
+            "tag": tag or "",
             "favorite": favorite or False,
             "archived": archived or False,
             "deleted": deleted,
@@ -109,11 +114,8 @@ def items_new(request: Request, session: Session = Depends(get_session)):
     )
 
 
-def _fix_form_encoding(value: str) -> str:
-    try:
-        return value.encode("latin-1").decode("utf-8")
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        return value
+def _parse_tag_names(raw_tags: str) -> list[str]:
+    return [part.strip() for part in raw_tags.split(",") if part.strip()]
 
 
 @router.post("/items")
@@ -124,15 +126,17 @@ def items_create(
     type: str = Form("note"),
     body: str = Form(""),
     url: str = Form(""),
+    tags: str = Form(""),
     csrf_token: str | None = Form(None),
 ):
     user = get_current_user(request, session)
     if user is None:
         return RedirectResponse("/login", status_code=302)
-    title = _fix_form_encoding(title)
-    body = _fix_form_encoding(body)
-    url = _fix_form_encoding(url)
-    type = _fix_form_encoding(type)
+    title = fix_form_value(title)
+    body = fix_form_value(body)
+    url = fix_form_value(url)
+    type = fix_form_value(type)
+    tags = fix_form_value(tags)
     if not _csrf_ok(request, csrf_token):
         return _csrf_response(
             request,
@@ -153,11 +157,14 @@ def items_create(
             status_code=422,
             user=user,
             action="/items",
-            item={"title": title, "type": type, "body": body, "url": url},
+            item={"title": title, "type": type, "body": body, "url": url, "tags": tags},
             error=message,
         )
+    tag_names = _parse_tag_names(tags)
     try:
         item = create_item(session, user.id, data)
+        if tag_names:
+            set_item_tags(session, user.id, item.id, tag_names)
     except ValueError as error:
         return _csrf_response(
             request,
@@ -165,7 +172,7 @@ def items_create(
             status_code=422,
             user=user,
             action="/items",
-            item={"title": title, "type": type, "body": body, "url": url},
+            item={"title": title, "type": type, "body": body, "url": url, "tags": tags},
             error=str(error),
         )
     return RedirectResponse(f"/items/{item.id}", status_code=302)
@@ -179,7 +186,10 @@ def items_detail(request: Request, item_id: int, session: Session = Depends(get_
     item = get_item(session, user.id, item_id)
     if item is None:
         return _csrf_response(request, "items/not_found.html", status_code=404, user=user)
-    return _csrf_response(request, "items/detail.html", user=user, item=item)
+    item_tags = get_item_tags(session, user.id, item.id)
+    return _csrf_response(
+        request, "items/detail.html", user=user, item=item, item_tags=item_tags
+    )
 
 
 @router.post("/items/{item_id}/toggle/{flag}")

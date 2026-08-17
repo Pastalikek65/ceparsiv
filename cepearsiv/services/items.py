@@ -4,7 +4,7 @@ from typing import Literal
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
-from cepearsiv.models import Item, utcnow
+from cepearsiv.models import Item, ItemTag, Tag, utcnow
 from cepearsiv.schemas import ItemCreate
 
 MAX_SLUG_ATTEMPTS = 5
@@ -109,6 +109,7 @@ def list_items(
     session: Session,
     user_id: int,
     type: str | None = None,
+    tag: str | None = None,
     favorite: bool | None = None,
     archived: bool | None = None,
     deleted: bool = False,
@@ -116,6 +117,12 @@ def list_items(
     page_size: int = 20,
 ) -> tuple[list[Item], bool]:
     stmt = select(Item).where(Item.user_id == user_id, Item.is_deleted == deleted)
+    if tag is not None:
+        stmt = (
+            stmt.join(ItemTag, ItemTag.item_id == Item.id)
+            .join(Tag, Tag.id == ItemTag.tag_id)
+            .where(Tag.user_id == user_id, Tag.name == tag)
+        )
     if type is not None:
         stmt = stmt.where(Item.type == type)
     if favorite is not None:

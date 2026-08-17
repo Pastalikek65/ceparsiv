@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Etiketler — CepArsiv{% endblock %}
+
+{% block content %}
+<header>
+  <h2>Etiketler</h2>
+</header>
+
+{% if tags %}
+<table>
+  <thead>
+    <tr><th>Etiket</th><th>Öğe sayısı</th></tr>
+  </thead>
+  <tbody>
+    {% for tag, count in tags %}
+    <tr>
+      <td><a href="/items?tag={{ tag.name }}">{{ tag.name }}</a></td>
+      <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p><em>Henüz etiket yok.</em></p>
+{% endif %}
+
+<p><a href="/items">← Arşive dön</a></p>
+{% endblock %}

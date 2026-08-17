@@ -12,6 +12,14 @@
     {% if item.is_deleted %}<span title="Çöpte">🗑</span>{% endif %}
   </header>
 
+  {% if item_tags %}
+  <p>
+    {% for tag in item_tags %}
+    <a href="/items?tag={{ tag.name }}" class="secondary" role="button">{{ tag.name }}</a>
+    {% endfor %}
+  </p>
+  {% endif %}
+
   {% if item.url %}
   <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
   {% endif %}

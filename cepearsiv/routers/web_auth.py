@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from cepearsiv.config import settings
-from cepearsiv.deps import SESSION_COOKIE, get_current_user, get_session
+from cepearsiv.deps import SESSION_COOKIE, fix_form_value, get_current_user, get_session
 from cepearsiv.security import generate_csrf_token
 from cepearsiv.services.auth import (
     LimitExceeded,
@@ -69,7 +69,7 @@ def register_post(
             request, "auth/register.html", 403, "CSRF dogrulamasi basarisiz."
         )
     try:
-        register(session, username, password)
+        register(session, fix_form_value(username), fix_form_value(password))
     except ValueError:
         return _render_csrf_error(request, "auth/register.html", 409, "Bu kullanici adi alinmis.")
     return RedirectResponse("/login", status_code=302)
@@ -92,7 +92,9 @@ def login_post(
         return _render_csrf_error(request, "auth/login.html", 403, "CSRF dogrulamasi basarisiz.")
     ip = request.client.host if request.client else ""
     try:
-        user = authenticate(session, username, password, ip=ip)
+        user = authenticate(
+            session, fix_form_value(username), fix_form_value(password), ip=ip
+        )
     except LimitExceeded:
         return _render_csrf_error(
             request, "auth/login.html", 429, "Cok fazla deneme. Daha sonra tekrar deneyin."

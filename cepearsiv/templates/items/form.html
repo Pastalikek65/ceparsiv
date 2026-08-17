@@ -23,6 +23,9 @@
     <label>URL <small>(yalnızca yer imi için zorunlu)</small>
       <input type="text" name="url" value="{{ item.url if item and item.url else '' }}">
     </label>
+    <label>Etiketler <small>(virgülle ayır)</small>
+      <input type="text" name="tags" value="{{ item.tags if item and item.tags else '' }}" placeholder="python, django">
+    </label>
     <label>İçerik
       <textarea name="body" rows="6">{{ item.body if item else '' }}</textarea>
     </label>
