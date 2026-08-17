@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from cepearsiv.config import settings
-from cepearsiv.routers import web_auth
+from cepearsiv.routers import web_auth, web_items
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -45,6 +45,7 @@ app = FastAPI(title="CepArsiv", debug=settings.debug, lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static"), check_dir=False), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.include_router(web_auth.router)
+app.include_router(web_items.router)
 
 
 @app.get("/healthz")

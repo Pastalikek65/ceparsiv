@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} — CepArsiv{% endblock %}
+
+{% block content %}
+<article>
+  <header>
+    <h2>{{ item.title }}</h2>
+    <small>{{ item.type }}</small>
+    {% if item.is_favorite %}<span title="Favori">⭐</span>{% endif %}
+    {% if item.is_archived %}<span title="Arşivde">🗄</span>{% endif %}
+    {% if item.is_deleted %}<span title="Çöpte">🗑</span>{% endif %}
+  </header>
+
+  {% if item.url %}
+  <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
+  {% endif %}
+
+  <p style="white-space:pre-wrap;">{{ item.body }}</p>
+
+  <footer>
+    <small>
+      Oluşturuldu: {{ item.created_at.strftime("%Y-%m-%d %H:%M") }} ·
+      Güncellendi: {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}
+    </small>
+  </footer>
+</article>
+
+<div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem;">
+  {% if not item.is_deleted %}
+  <form method="post" action="/items/{{ item.id }}/toggle/favorite" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="secondary">{% if item.is_favorite %}Favoriden çıkar{% else %}Favorile{% endif %}</button>
+  </form>
+  <form method="post" action="/items/{{ item.id }}/toggle/archived" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="secondary">{% if item.is_archived %}Arşivden çıkar{% else %}Arşivle{% endif %}</button>
+  </form>
+  <form method="post" action="/items/{{ item.id }}/toggle/deleted" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="contrast">Sil</button>
+  </form>
+  {% else %}
+  <form method="post" action="/items/{{ item.id }}/restore" style="margin:0;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">Geri Al</button>
+  </form>
+  {% endif %}
+</div>
+
+<p style="margin-top:1rem;"><a href="/items">← Listeye dön</a></p>
+{% endblock %}

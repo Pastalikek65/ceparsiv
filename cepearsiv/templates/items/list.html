@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Arşiv — CepArsiv{% endblock %}
+
+{% block content %}
+<header>
+  <h2>Arşiv <small>({{ user.username }})</small></h2>
+  <p><a href="/items/new" role="button">+ Yeni Item</a> · <a href="/account">Hesap</a></p>
+</header>
+
+<form method="get" action="/items" style="display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+  <select name="type" aria-label="Tür">
+    <option value="">Tür: Hepsi</option>
+    <option value="note" {% if filters.type == 'note' %}selected{% endif %}>Not</option>
+    <option value="bookmark" {% if filters.type == 'bookmark' %}selected{% endif %}>Yer imi</option>
+    <option value="snippet" {% if filters.type == 'snippet' %}selected{% endif %}>Snippet</option>
+  </select>
+  <label style="display:inline-flex;align-items:center;gap:.3rem;">
+    <input type="checkbox" name="favorite" value="1" {% if filters.favorite %}checked{% endif %}> Favori
+  </label>
+  <label style="display:inline-flex;align-items:center;gap:.3rem;">
+    <input type="checkbox" name="archived" value="1" {% if filters.archived %}checked{% endif %}> Arşiv
+  </label>
+  <label style="display:inline-flex;align-items:center;gap:.3rem;">
+    <input type="checkbox" name="deleted" value="1" {% if filters.deleted %}checked{% endif %}> Çöp
+  </label>
+  <button type="submit">Filtrele</button>
+</form>
+
+{% if items %}
+{% for item in items %}
+{% include "partials/item_card.html" %}
+{% endfor %}
+{% else %}
+<p><em>Henüz öğe yok. <a href="/items/new">İlk öğeni oluştur</a>.</em></p>
+{% endif %}
+
+<nav style="display:flex; gap:.5rem; margin-top:1rem;">
+  {% if prev_query %}<a href="/items{{ prev_query }}" role="button" class="secondary">← Önceki</a>{% endif %}
+  {% if next_query %}<a href="/items{{ next_query }}" role="button" class="secondary">Sonraki →</a>{% endif %}
+</nav>
+{% endblock %}

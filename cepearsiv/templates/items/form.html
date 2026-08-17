@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni Item — CepArsiv{% endblock %}
+
+{% block content %}
+<article>
+  <h2>Yeni Item</h2>
+  {% if error %}
+  <p><strong>{{ error }}</strong></p>
+  {% endif %}
+  <form method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Başlık
+      <input type="text" name="title" value="{{ item.title if item else '' }}" maxlength="200" required>
+    </label>
+    <label>Tür
+      <select name="type">
+        <option value="note" {% if item and item.type == 'note' %}selected{% endif %}>Not</option>
+        <option value="bookmark" {% if item and item.type == 'bookmark' %}selected{% endif %}>Yer imi</option>
+        <option value="snippet" {% if item and item.type == 'snippet' %}selected{% endif %}>Snippet</option>
+      </select>
+    </label>
+    <label>URL <small>(yalnızca yer imi için zorunlu)</small>
+      <input type="text" name="url" value="{{ item.url if item and item.url else '' }}">
+    </label>
+    <label>İçerik
+      <textarea name="body" rows="6">{{ item.body if item else '' }}</textarea>
+    </label>
+    <button type="submit">Kaydet</button>
+  </form>
+  <p><a href="/items">← Listeye dön</a></p>
+</article>
+{% endblock %}
