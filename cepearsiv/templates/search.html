@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Arama — CepArsiv{% endblock %}
+
+{% block content %}
+<header>
+  <h2>Arama</h2>
+</header>
+
+<form method="get" action="/search">
+  <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:flex-end;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Ara…" style="flex:1; min-width:160px;">
+    <select name="type" aria-label="Tür" style="width:auto;">
+      <option value="">Tür: Hepsi</option>
+      <option value="note" {% if filters.type == 'note' %}selected{% endif %}>Not</option>
+      <option value="bookmark" {% if filters.type == 'bookmark' %}selected{% endif %}>Yer imi</option>
+      <option value="snippet" {% if filters.type == 'snippet' %}selected{% endif %}>Snippet</option>
+    </select>
+    <label style="display:inline-flex;align-items:center;gap:.3rem;">
+      <input type="checkbox" name="archived" value="0" {% if not filters.archived %}checked{% endif %}> Arşivi hariç tut
+    </label>
+    <label style="display:inline-flex;align-items:center;gap:.3rem;">
+      <input type="checkbox" name="deleted" value="1" {% if filters.deleted %}checked{% endif %}> Çöpü dahil et
+    </label>
+    <button type="submit">Ara</button>
+  </div>
+  <input type="text" name="tag" value="{{ filters.tag }}" placeholder="Etiket filtresi (opsiyonel)">
+</form>
+
+{% if searched %}
+  {% if items %}
+  <p><small>{{ backend }} backend · sonuçlar:</small></p>
+  {% for item in items %}
+  <article>
+    <header>
+      <strong><a href="/items/{{ item.id }}">{{ item.title }}</a></strong>
+      <small>{{ item.type }}</small>
+      {% if item.is_archived %}<span title="Arşivde">🗄</span>{% endif %}
+      {% if item.is_deleted %}<span title="Çöpte">🗑</span>{% endif %}
+    </header>
+    {% if item.body %}<p>{{ item.body[:100] }}{% if item.body|length > 100 %}…{% endif %}</p>{% endif %}
+    <footer><small>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</small></footer>
+  </article>
+  {% endfor %}
+  <nav style="display:flex; gap:.5rem; margin-top:1rem;">
+    {% if prev_query %}<a href="/search{{ prev_query }}" role="button" class="secondary">← Önceki</a>{% endif %}
+    {% if next_query %}<a href="/search{{ next_query }}" role="button" class="secondary">Sonraki →</a>{% endif %}
+  </nav>
+  {% else %}
+  <p><em>Sonuç bulunamadı.</em></p>
+  {% endif %}
+{% endif %}
+
+<p style="margin-top:1rem;"><a href="/items">← Arşive dön</a></p>
+{% endblock %}
