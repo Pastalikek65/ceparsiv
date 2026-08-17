@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr"{% set theme = request.cookies.get("theme") %}{% if theme in ("dark", "light") %} data-theme="{{ theme }}"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,6 +8,18 @@
 </head>
 <body>
   <main class="container">
+    {% set csrf_val = (csrf_token if csrf_token is defined else "") or request.cookies.get("csrf_token") %}
+    {% if csrf_val %}
+    <nav class="theme-toggle" style="display:flex;gap:.5rem;justify-content:flex-end;">
+      {% for value in ("light", "dark", "auto") %}
+      <form method="post" action="/settings/theme" style="display:inline;margin:0;">
+        <input type="hidden" name="theme" value="{{ value }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_val }}">
+        <button type="submit" class="contrast outline">{% if value == "light" %}Açık{% elif value == "dark" %}Koyu{% else %}Oto{% endif %}</button>
+      </form>
+      {% endfor %}
+    </nav>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
   <script src="/static/htmx.min.js" defer></script>
