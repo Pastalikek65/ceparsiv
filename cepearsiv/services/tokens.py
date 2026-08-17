@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlmodel import Session, select
 
 from cepearsiv.models import ApiToken
+from cepearsiv.services.audit import log_audit
 
 
 def _utcnow() -> datetime:
@@ -26,6 +27,7 @@ def create_api_token(session: Session, user_id: int, name: str) -> tuple[ApiToke
     session.add(token)
     session.commit()
     session.refresh(token)
+    log_audit(session, user_id, "token.created", entity_type="api_token", entity_id=token.id)
     return token, raw
 
 

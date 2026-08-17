@@ -6,7 +6,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from cepearsiv.config import settings
-from cepearsiv.routers import api_tokens, api_v1, web_auth, web_items, web_search, web_tags
+from cepearsiv.routers import (
+    api_tokens,
+    api_v1,
+    web_auth,
+    web_data,
+    web_items,
+    web_search,
+    web_settings,
+    web_tags,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -48,6 +57,8 @@ app.include_router(web_auth.router)
 app.include_router(web_items.router)
 app.include_router(web_search.router)
 app.include_router(web_tags.router)
+app.include_router(web_data.router)
+app.include_router(web_settings.router)
 app.include_router(api_v1.router, prefix="/api/v1")
 app.include_router(api_tokens.router)
 

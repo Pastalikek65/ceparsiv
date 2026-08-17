@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Denetim Kaydı — CepArsiv{% endblock %}
+
+{% block content %}
+<header>
+  <h2>Denetim Kaydı</h2>
+  <p><small>Son 100 kayıt gösterilir.</small></p>
+</header>
+
+{% if audit_logs %}
+<table>
+  <thead>
+    <tr><th>Zaman</th><th>Action</th><th>Entity</th><th>ID</th><th>Detail</th><th>IP</th></tr>
+  </thead>
+  <tbody>
+    {% for row in audit_logs %}
+    <tr>
+      <td><small>{{ row.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</small></td>
+      <td><code>{{ row.action }}</code></td>
+      <td>{{ row.entity_type or "—" }}</td>
+      <td>{{ row.entity_id or "—" }}</td>
+      <td>{{ row.detail or "—" }}</td>
+      <td><small>{{ row.ip or "—" }}</small></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p><em>No audit logs</em></p>
+{% endif %}
+
+<p><a href="/account">← Hesaba dön</a></p>
+{% endblock %}

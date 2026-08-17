@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 from cepearsiv.config import settings
 from cepearsiv.models import User, UserSession
 from cepearsiv.security import generate_token, hash_password, verify_password
+from cepearsiv.services.audit import log_audit
 
 RATE_LIMIT_MAX = 5
 RATE_LIMIT_WINDOW_SECONDS = 300
@@ -52,7 +53,11 @@ def authenticate(session: Session, username: str, password: str, ip: str) -> Use
     _check_rate_limit((ip, username))
     user = session.exec(select(User).where(User.username == username)).first()
     if user is None or not verify_password(password, user.password_hash):
+        log_audit(
+            session, None, "login.failure", detail=f"username={username}", ip=ip
+        )
         return None
+    log_audit(session, user.id, "login.success", ip=ip)
     return user
 
 

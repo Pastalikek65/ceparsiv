@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 
 from cepearsiv.models import Item, ItemTag, Tag, utcnow
 from cepearsiv.schemas import ItemCreate
+from cepearsiv.services.audit import log_audit
 
 MAX_SLUG_ATTEMPTS = 5
 
@@ -59,6 +60,7 @@ def create_item(session: Session, user_id: int, data: ItemCreate) -> Item:
             session.rollback()
             continue
         session.refresh(item)
+        log_audit(session, user_id, "item.created", entity_type="item", entity_id=item.id)
         return item
     raise ValueError("benzersiz slug uretilemedi")
 
