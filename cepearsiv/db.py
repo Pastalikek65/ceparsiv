@@ -5,10 +5,16 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 from sqlmodel import Session, SQLModel, create_engine
 
-FTS_TABLE_DDL = (
+FTS_TABLE_UNICODE61 = (
     "CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5("
     "title, body, content='items', content_rowid='id', tokenize='unicode61')"
 )
+FTS_TABLE_TRIGRAM = (
+    "CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5("
+    "title, body, content='items', content_rowid='id',"
+    " tokenize='trigram case_sensitive 0')"
+)
+FTS_TABLE_DDL = FTS_TABLE_UNICODE61
 TRIGGER_ITEMS_AI = """
 CREATE TRIGGER IF NOT EXISTS items_ai AFTER INSERT ON items BEGIN
     INSERT INTO items_fts(rowid, title, body) VALUES (new.id, new.title, new.body);
@@ -46,10 +52,35 @@ def get_engine(database_url: str) -> Engine:
     return engine
 
 
+def trigram_supported(conn) -> bool:
+    try:
+        conn.execute(text("CREATE VIRTUAL TABLE _probe USING fts5(x, tokenize='trigram case_sensitive 0')"))
+        conn.execute(text("DROP TABLE _probe"))
+        return True
+    except OperationalError:
+        return False
+
+
+def _fts_table_sql(conn) -> str | None:
+    row = conn.execute(
+        text("SELECT sql FROM sqlite_master WHERE type='table' AND name='items_fts'")
+    ).first()
+    return row[0] if row is not None else None
+
+
 def _ensure_fts(engine: Engine) -> None:
     try:
         with engine.begin() as conn:
-            conn.execute(text(FTS_TABLE_DDL))
+            has_trigram = trigram_supported(conn)
+            existing = _fts_table_sql(conn)
+            if existing is not None:
+                if has_trigram and "trigram" not in existing:
+                    conn.execute(text("DROP TABLE items_fts"))
+                    conn.execute(text(FTS_TABLE_TRIGRAM))
+                elif not has_trigram and "unicode61" not in existing:
+                    conn.execute(text(FTS_TABLE_UNICODE61))
+            else:
+                conn.execute(text(FTS_TABLE_TRIGRAM if has_trigram else FTS_TABLE_UNICODE61))
     except OperationalError:
         return
     with engine.begin() as conn:

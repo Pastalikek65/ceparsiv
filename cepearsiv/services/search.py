@@ -145,7 +145,12 @@ def search_items(
 ) -> tuple[list[Item], bool]:
     if not q or not q.strip():
         raise ValueError("arama sorgusu bos olamaz")
-    if backend == "fts5":
+    if backend in ("fts5", "trigram"):
+        if backend == "trigram" and _needs_like(q):
+            return _search_like(
+                session, user_id, q, type, tag, include_archived, include_deleted,
+                page, page_size,
+            )
         return _search_fts5(
             session, user_id, q, type, tag, include_archived, include_deleted,
             page, page_size,
@@ -158,8 +163,19 @@ def search_items(
     raise ValueError(f"bilinmeyen arama backend: {backend}")
 
 
+def _needs_like(user_input: str) -> bool:
+    terms = [raw for raw in user_input.strip().split() if _clean_fts_term(raw)]
+    if not terms:
+        return False
+    return any(len(term) < 3 for term in terms)
+
+
 def detect_backend(session: Session) -> str:
     row = session.execute(
-        text("SELECT name FROM sqlite_master WHERE type='table' AND name='items_fts'")
+        text("SELECT name, sql FROM sqlite_master WHERE type='table' AND name='items_fts'")
     ).first()
-    return "fts5" if row is not None else "like"
+    if row is None:
+        return "like"
+    if row[1] and "trigram" in row[1]:
+        return "trigram"
+    return "fts5"
