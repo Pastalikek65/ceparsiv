@@ -1,6 +1,9 @@
+import base64
 import re
+from datetime import datetime
 from typing import Literal
 
+from sqlalchemy import and_, or_
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
@@ -121,6 +124,20 @@ def restore_item(session: Session, user_id: int, item_id: int) -> Item:
     return item
 
 
+def encode_cursor(created_at: datetime, item_id: int) -> str:
+    payload = f"{created_at.isoformat()}|{item_id}".encode()
+    return base64.urlsafe_b64encode(payload).decode()
+
+
+def decode_cursor(token: str) -> tuple[datetime, int]:
+    try:
+        payload = base64.urlsafe_b64decode(token.encode()).decode()
+        raw_ts, raw_id = payload.rsplit("|", 1)
+        return datetime.fromisoformat(raw_ts), int(raw_id)
+    except Exception:
+        raise ValueError("gecersiz imlec")
+
+
 def list_items(
     session: Session,
     user_id: int,
@@ -131,6 +148,7 @@ def list_items(
     deleted: bool = False,
     page: int = 1,
     page_size: int = 20,
+    cursor: str | None = None,
 ) -> tuple[list[Item], bool]:
     stmt = select(Item).where(Item.user_id == user_id, Item.is_deleted == deleted)
     if tag is not None:
@@ -145,11 +163,18 @@ def list_items(
         stmt = stmt.where(Item.is_favorite == favorite)
     if archived is not None:
         stmt = stmt.where(Item.is_archived == archived)
-    stmt = (
-        stmt.order_by(Item.created_at.desc(), Item.id.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size + 1)
-    )
+    stmt = stmt.order_by(Item.created_at.desc(), Item.id.desc())
+    if cursor:
+        cursor_ts, cursor_id = decode_cursor(cursor)
+        stmt = stmt.where(
+            or_(
+                Item.created_at < cursor_ts,
+                and_(Item.created_at == cursor_ts, Item.id < cursor_id),
+            )
+        )
+    else:
+        stmt = stmt.offset((page - 1) * page_size)
+    stmt = stmt.limit(page_size + 1)
     rows = list(session.exec(stmt).all())
     has_next = len(rows) > page_size
     return rows[:page_size], has_next

@@ -187,3 +187,39 @@ def test_api_tags_endpoint(db_session, client):
     assert response.status_code == 200
     tags = response.json()["tags"]
     assert {"name": "python", "count": 1} in tags
+
+
+def test_api_cursor_pagination(db_session, client):
+    from cepearsiv.schemas import ItemCreate
+    from cepearsiv.services.items import create_item
+    from tests.conftest import make_user
+
+    user = make_user(db_session, username="cursorapi")
+    raw = _create_token(db_session, user.id)
+    headers = {"Authorization": f"Bearer {raw}"}
+    for i in range(25):
+        create_item(db_session, user.id, ItemCreate(type="note", title=f"İmlec {i}"))
+
+    data = client.get("/api/v1/items?limit=20", headers=headers).json()
+    assert data["has_next"] is True
+    assert data["next_cursor"]
+
+    page2 = client.get(
+        f"/api/v1/items?limit=20&cursor={data['next_cursor']}", headers=headers
+    ).json()
+    ids1 = {item["id"] for item in data["items"]}
+    ids2 = {item["id"] for item in page2["items"]}
+    assert len(page2["items"]) == 5
+    assert page2["has_next"] is False
+    assert page2["next_cursor"] is None
+    assert not ids1 & ids2
+
+
+def test_api_invalid_cursor_422(db_session, client):
+    from tests.conftest import make_user
+
+    user = make_user(db_session, username="badcursor")
+    raw = _create_token(db_session, user.id)
+    headers = {"Authorization": f"Bearer {raw}"}
+    response = client.get("/api/v1/items?cursor=!!!", headers=headers)
+    assert response.status_code == 422

@@ -36,7 +36,6 @@
 {% endif %}
 
 <nav style="display:flex; gap:.5rem; margin-top:1rem;">
-  {% if prev_query %}<a href="/items{{ prev_query }}" role="button" class="secondary">← Önceki</a>{% endif %}
   {% if next_query %}<a href="/items{{ next_query }}" role="button" class="secondary">Sonraki →</a>{% endif %}
 </nav>
 {% endblock %}

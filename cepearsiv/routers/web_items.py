@@ -13,6 +13,8 @@ from cepearsiv.schemas import ItemCreate
 from cepearsiv.security import generate_csrf_token
 from cepearsiv.services.items import (
     create_item,
+    decode_cursor,
+    encode_cursor,
     get_item,
     list_items,
     restore_item,
@@ -53,7 +55,8 @@ def _parse_filters(request: Request):
         page = max(int(request.query_params.get("page", "1")), 1)
     except ValueError:
         page = 1
-    return item_type, tag, favorite, archived, deleted, page
+    cursor = request.query_params.get("cursor") or None
+    return item_type, tag, favorite, archived, deleted, page, cursor
 
 
 @router.get("/items")
@@ -61,7 +64,12 @@ def items_list(request: Request, session: Session = Depends(get_session)):
     user = get_current_user(request, session)
     if user is None:
         return RedirectResponse("/login", status_code=302)
-    item_type, tag, favorite, archived, deleted, page = _parse_filters(request)
+    item_type, tag, favorite, archived, deleted, page, cursor = _parse_filters(request)
+    if cursor is not None:
+        try:
+            decode_cursor(cursor)
+        except ValueError:
+            cursor = None
     items, has_next = list_items(
         session,
         user.id,
@@ -71,6 +79,7 @@ def items_list(request: Request, session: Session = Depends(get_session)):
         archived=archived,
         deleted=deleted,
         page=page,
+        cursor=cursor,
     )
     params = []
     if item_type:
@@ -86,15 +95,17 @@ def items_list(request: Request, session: Session = Depends(get_session)):
     base_query = f"?{'&'.join(params)}" if params else ""
     if params:
         base_query += "&"
+    next_query = None
+    if has_next and items:
+        next_cursor = encode_cursor(items[-1].created_at, items[-1].id)
+        next_query = f"{base_query or '?'}cursor={next_cursor}"
     return _csrf_response(
         request,
         "items/list.html",
         user=user,
         items=items,
         has_next=has_next,
-        current_page=page,
-        prev_query=f"{base_query}page={page - 1}" if page > 1 else None,
-        next_query=f"{base_query}page={page + 1}" if has_next else None,
+        next_query=next_query,
         filters={
             "type": item_type or "",
             "tag": tag or "",

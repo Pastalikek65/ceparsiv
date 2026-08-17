@@ -5,6 +5,8 @@ from cepearsiv.deps import get_api_user, get_session
 from cepearsiv.schemas import ItemCreate, ItemOut, ItemUpdate, SearchOut, TagOut
 from cepearsiv.services.items import (
     create_item,
+    decode_cursor,
+    encode_cursor,
     get_item,
     list_items,
     toggle_flag,
@@ -35,7 +37,13 @@ def api_list_items(
     deleted: bool = False,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=MAX_PAGE_LIMIT),
+    cursor: str | None = None,
 ):
+    if cursor is not None:
+        try:
+            decode_cursor(cursor)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="gecersiz imlec")
     items, has_next = list_items(
         session,
         user.id,
@@ -46,11 +54,14 @@ def api_list_items(
         deleted=deleted,
         page=page,
         page_size=limit,
+        cursor=cursor,
     )
+    next_cursor = encode_cursor(items[-1].created_at, items[-1].id) if (items and has_next) else None
     return {
         "items": [_item_out(session, user.id, item) for item in items],
         "has_next": has_next,
         "page": page,
+        "next_cursor": next_cursor,
     }
 
 
