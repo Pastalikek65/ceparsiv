@@ -7,7 +7,7 @@ from sqlmodel import Session
 
 from cepearsiv.deps import fix_form_value, get_current_user, get_session
 from cepearsiv.security import generate_csrf_token
-from cepearsiv.services.search import detect_backend, search_items
+from cepearsiv.services.search import build_highlight, detect_backend, search_items
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -70,6 +70,10 @@ def search_route(request: Request, session: Session = Depends(get_session)):
             page=page,
         )
         context.update(searched=True, items=items, has_next=has_next)
+        terms = [t for t in q.split() if t.strip()]
+        context["highlights"] = {
+            item.id: build_highlight(item.body or "", terms) for item in items
+        }
         parts = [f"q={q}"]
         if item_type:
             parts.append(f"type={item_type}")

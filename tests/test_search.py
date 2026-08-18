@@ -120,3 +120,27 @@ def test_build_fts_query_escapes_operators():
     assert build_fts_query('"quoted"') == '"quoted"'
     assert build_fts_query("*") == ""
     assert build_fts_query("python AND django") == '"python" AND "AND" AND "django"'
+
+
+def test_build_highlight_wraps_terms():
+    from cepearsiv.services.search import build_highlight
+
+    out = build_highlight("kisa icerik", ["kisa"])
+    assert "<mark>kisa</mark>" in out
+
+
+def test_build_highlight_truncates_long_body():
+    from cepearsiv.services.search import build_highlight
+
+    body = "a" * 500 + " hedef " + "b" * 500
+    out = build_highlight(body, ["hedef"])
+    assert "…" in out
+    assert len(out) < 180
+
+
+def test_build_highlight_escapes_html():
+    from cepearsiv.services.search import build_highlight
+
+    out = build_highlight("<script>x</script> guvenli", ["guvenli"])
+    assert "<script>" not in out
+    assert "<mark>guvenli</mark>" in out

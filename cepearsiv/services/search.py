@@ -1,3 +1,6 @@
+import html
+import re
+
 from sqlalchemy import func, or_, text
 from sqlmodel import Session, select
 
@@ -179,3 +182,30 @@ def detect_backend(session: Session) -> str:
     if row[1] and "trigram" in row[1]:
         return "trigram"
     return "fts5"
+
+
+def build_highlight(body: str, terms: list[str], radius: int = 60) -> str:
+    if not body:
+        return ""
+    lowered = body.lower()
+    first = len(body)
+    for term in terms:
+        idx = lowered.find(term.lower())
+        if idx != -1:
+            first = min(first, idx)
+    if first == len(body):
+        snippet = body[: 2 * radius]
+        prefix = ""
+        suffix = ""
+    else:
+        start = max(0, first - radius)
+        end = min(len(body), first + radius)
+        prefix = "…" if start > 0 else ""
+        suffix = "…" if end < len(body) else ""
+        snippet = body[start:end]
+    text = html.escape(prefix + snippet + suffix)
+    escaped = [html.escape(t) for t in terms if t.strip()]
+    if not escaped:
+        return text
+    pattern = re.compile("(" + "|".join(re.escape(t) for t in escaped) + ")", re.IGNORECASE)
+    return pattern.sub(r"<mark>\1</mark>", text)
