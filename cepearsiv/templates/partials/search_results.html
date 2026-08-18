@@ -1,0 +1,43 @@
+<div id="search-results">
+  {% if searched %}
+    {% if items %}
+    <p class="small muted mono" style="margin-bottom:.8rem;">{{ backend }} backend · {{ items|length }} sonuç</p>
+    {% for item in items %}
+    <article class="card lift stamp-in" style="margin:0 0 .9rem;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;">
+        <span class="cat-num">{{ "%04d"|format(item.id) }}</span>
+        <span>
+          {% if item.is_archived %}<span title="Arşivde" style="margin-right:.4rem;">🗄</span>{% endif %}
+          {% if item.is_deleted %}<span title="Çöpte" style="margin-right:.4rem;">🗑</span>{% endif %}
+          <span class="stamp">{{ item.type }}</span>
+        </span>
+      </div>
+      <h3 style="margin:.5rem 0 .35rem;font-size:1.05rem;">
+        <a class="card-link" href="/items/{{ item.id }}">{{ item.title }}</a>
+      </h3>
+      {% if item.body %}
+      <p class="muted small" style="margin:.25rem 0 .5rem;">{{ highlights.get(item.id, item.body[:120])|safe }}{% if item.body|length > 180 %}…{% endif %}</p>
+      {% endif %}
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;">
+        <span class="small muted mono">{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</span>
+        {% if item.url %}<span class="small"><a href="{{ item.url }}" rel="noopener" target="_blank">{{ item.url[:40] }}</a></span>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="empty">
+      <p class="big">Sonuç bulunamadı</p>
+      <p>Farklı kelimeler ya da daha kısa bir sorgu dene.</p>
+    </div>
+    {% endif %}
+    <nav class="load-more" style="display:flex;gap:.6rem;justify-content:center;">
+      {% if prev_query %}<a class="btn ghost" href="/search{{ prev_query }}">← Önceki</a>{% endif %}
+      {% if next_query %}<a class="btn outline" href="/search{{ next_query }}">Sonraki →</a>{% endif %}
+    </nav>
+  {% else %}
+  <div class="empty">
+    <p class="big">Ne arıyorsun?</p>
+    <p>Üstteki kutuya yaz, sonuçlar anında gelir.</p>
+  </div>
+  {% endif %}
+</div>

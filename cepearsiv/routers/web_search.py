@@ -88,4 +88,6 @@ def search_route(request: Request, session: Session = Depends(get_session)):
             context["prev_query"] = f"{base_query}page={page - 1}"
         if has_next:
             context["next_query"] = f"{base_query}page={page + 1}"
+    if request.query_params.get("partial") == "1":
+        return templates.TemplateResponse(request, "partials/search_results.html", context)
     return templates.TemplateResponse(request, "search.html", context)
