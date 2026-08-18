@@ -207,7 +207,7 @@ def account_get(request: Request, session: Session = Depends(get_session)):
     user = get_current_user(request, session)
     if user is None:
         return RedirectResponse("/login", status_code=302)
-    token = generate_csrf_token()
+    token = request.cookies.get(CSRF_COOKIE) or generate_csrf_token()
     response = templates.TemplateResponse(
         request, "auth/account.html", {"csrf_token": token, "user": user}
     )
