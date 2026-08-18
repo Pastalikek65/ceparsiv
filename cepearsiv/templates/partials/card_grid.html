@@ -1,0 +1,15 @@
+{% for item in items %}
+{% include "partials/item_card.html" %}
+{% endfor %}
+{% if has_next and items %}
+<div class="load-more">
+  <button
+    class="btn outline"
+    hx-get="/items{{ next_query }}&partial=1"
+    hx-target="#card-grid"
+    hx-swap="beforeend"
+    hx-indicator="this"
+  >Daha fazla…</button>
+  <span class="htmx-indicator" aria-hidden="true">Yükleniyor…</span>
+</div>
+{% endif %}

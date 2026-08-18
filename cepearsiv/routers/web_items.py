@@ -107,8 +107,6 @@ def items_list(request: Request, session: Session = Depends(get_session)):
         "items/list.html",
         user=user,
         items=items,
-        has_next=has_next,
-        next_query=next_query,
         filters={
             "type": item_type or "",
             "tag": tag or "",
@@ -117,6 +115,22 @@ def items_list(request: Request, session: Session = Depends(get_session)):
             "deleted": deleted,
         },
     )
+    context = {
+        "user": user,
+        "items": items,
+        "has_next": has_next,
+        "next_query": next_query,
+        "filters": {
+            "type": item_type or "",
+            "tag": tag or "",
+            "favorite": favorite or False,
+            "archived": archived or False,
+            "deleted": deleted,
+        },
+    }
+    if request.query_params.get("partial") == "1":
+        return templates.TemplateResponse(request, "partials/card_grid.html", context)
+    return _csrf_response(request, "items/list.html", **context)
 
 
 @router.get("/items/new")
