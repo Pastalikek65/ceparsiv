@@ -12,16 +12,16 @@ def test_light_cookie_sets_data_theme(client):
 
 def test_auto_or_missing_cookie_no_data_theme(client):
     html = client.get("/").text
-    assert "data-theme" not in html
+    assert 'data-theme="auto"' in html
     client.cookies.set("theme", "auto")
     html = client.get("/").text
-    assert "data-theme" not in html
+    assert 'data-theme="auto"' in html
 
 
 def test_invalid_cookie_value_ignored(client):
     client.cookies.set("theme", "neon")
     html = client.get("/").text
-    assert "data-theme" not in html
+    assert 'data-theme="auto"' in html
 
 
 def test_toggle_sets_cookie_and_redirects(authenticated_client):
@@ -53,4 +53,4 @@ def test_toggle_visible_and_theme_applied_on_login_page(client):
     client.cookies.set("theme", "dark")
     html = client.get("/login").text
     assert 'data-theme="dark"' in html
-    assert 'action="/settings/theme"' in html
+    assert 'id="theme-toggle"' in html
