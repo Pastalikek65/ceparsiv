@@ -1,47 +1,50 @@
 <!doctype html>
-<html lang="tr"{% set theme = request.cookies.get("theme") %}{% if theme in ("dark", "light") %} data-theme="{{ theme }}"{% endif %}>
+<html lang="tr" data-theme="{% set theme = request.cookies.get("theme") %}{{ theme if theme in ("light", "dark", "auto") else "auto" }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#161A1E">
   <title>{% block title %}CepArsiv{% endblock %}</title>
-  <link rel="stylesheet" href="/static/pico.min.css">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="preload" href="/static/fonts/IBMPlexMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/app.css">
 </head>
-<body>
+<body data-user="{% if user %}1{% endif %}">
+  {% set csrf_val = (csrf_token if csrf_token is defined else "") or request.cookies.get("csrf_token") %}
+  {% if user %}
+  <header class="topbar">
+    <a class="wordmark" href="/">Cep<em>Arsiv</em></a>
+    <form class="search" method="get" action="/search">
+      <input class="form-control" type="search" id="topsearch" name="q" placeholder="Ara…  ( / )" autocomplete="off" value="{{ q if q is defined else '' }}">
+    </form>
+    <span class="spacer"></span>
+    <a class="navlink" href="/items">Arşiv</a>
+    <a class="navlink" href="/items/new">Yeni</a>
+    <a class="navlink text" href="/tags">Etiketler</a>
+    <a class="navlink text" href="/account">{{ user.username }}</a>
+    <button class="btn ghost small" type="button" id="theme-toggle" title="Tema değiştir">◐</button>
+    <form method="post" action="/logout" style="display:inline;margin:0;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_val }}">
+      <button type="submit" class="btn ghost small">Çıkış</button>
+    </form>
+  </header>
+  {% else %}
+  <header class="topbar">
+    <a class="wordmark" href="/">Cep<em>Arsiv</em></a>
+    <span class="spacer"></span>
+    <a class="navlink" href="/login">Giriş</a>
+    <a class="navlink" href="/register">Kayıt</a>
+  </header>
+  {% endif %}
   <main class="container">
-    {% set csrf_val = (csrf_token if csrf_token is defined else "") or request.cookies.get("csrf_token") %}
-    <nav style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
-      <strong><a href="/" style="text-decoration:none;">CepArsiv</a></strong>
-      {% if user %}
-      <a href="/items">Arşiv</a>
-      <a href="/items/new">Yeni</a>
-      <a href="/search">Arama</a>
-      <a href="/tags">Etiketler</a>
-      <a href="/settings/data">Veri</a>
-      <span style="flex:1"></span>
-      <a href="/account">{{ user.username }}</a>
-      <form method="post" action="/logout" style="display:inline;margin:0;">
-        <input type="hidden" name="csrf_token" value="{{ csrf_val }}">
-        <button type="submit" class="outline contrast" style="margin:0;">Çıkış</button>
-      </form>
-      {% else %}
-      <span style="flex:1"></span>
-      <a href="/login">Giriş</a>
-      <a href="/register">Kayıt</a>
-      {% endif %}
-    </nav>
-    {% if csrf_val %}
-    <nav class="theme-toggle" style="display:flex;gap:.5rem;justify-content:flex-end;">
-      {% for value in ("light", "dark", "auto") %}
-      <form method="post" action="/settings/theme" style="display:inline;margin:0;">
-        <input type="hidden" name="theme" value="{{ value }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_val }}">
-        <button type="submit" class="contrast outline">{% if value == "light" %}Açık{% elif value == "dark" %}Koyu{% else %}Oto{% endif %}</button>
-      </form>
-      {% endfor %}
-    </nav>
-    {% endif %}
     {% block content %}{% endblock %}
   </main>
+  <div class="toast-wrap" id="toast-wrap"></div>
   <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>
