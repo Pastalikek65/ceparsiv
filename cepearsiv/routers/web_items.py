@@ -12,6 +12,7 @@ from cepearsiv.markdownx import render_markdown
 from cepearsiv.models import ShareToken
 from cepearsiv.schemas import ItemCreate
 from cepearsiv.security import generate_csrf_token
+from cepearsiv.services.audit import log_audit
 from cepearsiv.services.items import (
     create_item,
     decode_cursor,
@@ -20,6 +21,7 @@ from cepearsiv.services.items import (
     list_items,
     restore_item,
     toggle_flag,
+    update_item,
 )
 from cepearsiv.services.tags import get_item_tags, set_item_tags
 
@@ -189,6 +191,79 @@ def items_create(
             error=str(error),
         )
     return RedirectResponse(f"/items/{item.id}", status_code=302)
+
+
+@router.get("/items/{item_id}/edit")
+def items_edit_form(
+    request: Request, item_id: int, session: Session = Depends(get_session)
+):
+    user = get_current_user(request, session)
+    if user is None:
+        return RedirectResponse("/login", status_code=302)
+    item = get_item(session, user.id, item_id)
+    if item is None:
+        return _csrf_response(request, "items/not_found.html", status_code=404, user=user)
+    tags = ", ".join(t.name for t in get_item_tags(session, user.id, item.id))
+    return _csrf_response(
+        request,
+        "items/form.html",
+        user=user,
+        action=f"/items/{item.id}/edit",
+        item={"title": item.title, "type": item.type, "body": item.body, "url": item.url or "", "tags": tags},
+        error=None,
+    )
+
+
+@router.post("/items/{item_id}/edit")
+def items_edit(
+    request: Request,
+    item_id: int,
+    session: Session = Depends(get_session),
+    title: str = Form(""),
+    type: str = Form("note"),
+    body: str = Form(""),
+    url: str = Form(""),
+    tags: str = Form(""),
+    csrf_token: str | None = Form(None),
+):
+    user = get_current_user(request, session)
+    if user is None:
+        return RedirectResponse("/login", status_code=302)
+    title = fix_form_value(title)
+    body = fix_form_value(body)
+    url = fix_form_value(url)
+    type = fix_form_value(type)
+    tags = fix_form_value(tags)
+    if not _csrf_ok(request, csrf_token):
+        return _csrf_response(
+            request, "items/form.html", status_code=403,
+            user=user, action=f"/items/{item_id}/edit",
+            item={"title": title, "type": type, "body": body, "url": url, "tags": tags},
+            error="CSRF dogrulamasi basarisiz.",
+        )
+    try:
+        data = ItemCreate(type=type, title=title.strip(), body=body, url=url.strip() or None)
+    except ValidationError as error:
+        message = error.errors()[0].get("msg", "Gecersiz giris.") if error.errors() else "Gecersiz giris."
+        return _csrf_response(
+            request, "items/form.html", status_code=422,
+            user=user, action=f"/items/{item_id}/edit",
+            item={"title": title, "type": type, "body": body, "url": url, "tags": tags},
+            error=message,
+        )
+    try:
+        item = update_item(session, user.id, item_id, data)
+        if tags.strip():
+            set_item_tags(session, user.id, item.id, _parse_tag_names(tags))
+        log_audit(session, user.id, "item.update", entity_type="item", entity_id=item.id)
+    except ValueError as error:
+        return _csrf_response(
+            request, "items/form.html", status_code=422,
+            user=user, action=f"/items/{item_id}/edit",
+            item={"title": title, "type": type, "body": body, "url": url, "tags": tags},
+            error=str(error),
+        )
+    return RedirectResponse(f"/items/{item_id}", status_code=302)
 
 
 @router.get("/items/{item_id}")

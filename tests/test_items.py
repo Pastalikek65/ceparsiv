@@ -9,7 +9,7 @@ from cepearsiv.services.items import (
     restore_item,
     toggle_flag,
 )
-from tests.conftest import make_user
+from tests.conftest import get_csrf, login_client, make_user
 
 
 def _user_a(db_session):
@@ -96,3 +96,55 @@ def test_toggle_favorite_and_archived(db_session):
     assert fav.is_favorite is True
     arc = toggle_flag(db_session, user.id, item.id, flag="archived")
     assert arc.is_archived is True
+
+
+def _create_item_via_ui(client, title, csrf):
+    response = client.post(
+        "/items",
+        data={"title": title, "type": "note", "body": "govde", "url": "", "tags": "", "csrf_token": csrf},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    return response.headers["location"].rsplit("/", 1)[-1]
+
+
+def test_edit_form_renders(client, db_session):
+    make_user(db_session, username="duzenleyen", password="Sifre12345")
+    login_client(client, "duzenleyen", "Sifre12345")
+    csrf = get_csrf(client, "/items/new")
+    item_id = _create_item_via_ui(client, "Eski baslik", csrf)
+    response = client.get(f"/items/{item_id}/edit")
+    assert response.status_code == 200
+    assert f'action="/items/{item_id}/edit"' in response.text
+    assert 'value="Eski baslik"' in response.text
+
+
+def test_edit_updates_item(client, db_session):
+    make_user(db_session, username="duzenleyen", password="Sifre12345")
+    login_client(client, "duzenleyen", "Sifre12345")
+    csrf = get_csrf(client, "/items/new")
+    item_id = _create_item_via_ui(client, "Eski baslik", csrf)
+    csrf = get_csrf(client, f"/items/{item_id}/edit")
+    response = client.post(
+        f"/items/{item_id}/edit",
+        data={"title": "Yeni baslik", "type": "note", "body": "yeni govde", "url": "", "tags": "guncel", "csrf_token": csrf},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert response.headers["location"].endswith(f"/items/{item_id}")
+    page = client.get(f"/items/{item_id}")
+    assert "Yeni baslik" in page.text
+    assert "guncel" in page.text
+
+
+def test_edit_wrong_csrf_rejected(client, db_session):
+    make_user(db_session, username="duzenleyen", password="Sifre12345")
+    login_client(client, "duzenleyen", "Sifre12345")
+    csrf = get_csrf(client, "/items/new")
+    item_id = _create_item_via_ui(client, "Eski baslik", csrf)
+    response = client.post(
+        f"/items/{item_id}/edit",
+        data={"title": "X", "type": "note", "body": "", "url": "", "tags": "", "csrf_token": "yanlis"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 403
