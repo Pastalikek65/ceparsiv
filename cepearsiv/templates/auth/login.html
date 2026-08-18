@@ -3,21 +3,26 @@
 {% block title %}Giriş — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <h2>Giriş</h2>
-  {% if error %}
-  <p><strong>{{ error }}</strong></p>
-  {% endif %}
-  <form method="post" action="/login">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label>Kullanıcı adı
-      <input type="text" name="username" autocomplete="username" required>
-    </label>
-    <label>Şifre
-      <input type="password" name="password" autocomplete="current-password" required>
-    </label>
-    <button type="submit">Giriş yap</button>
-  </form>
-  <p><a href="/register">Hesabın yok mu? Kayıt ol</a></p>
-</article>
+<section class="auth-wrap">
+  <div class="auth-brand">Cep<em>Arsiv</em></div>
+  <div class="card auth-card">
+    <h1 style="margin-top:0;">Giriş</h1>
+    {% if error %}
+    <div class="alert">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="username">Kullanıcı adı</label>
+        <input class="form-control" type="text" id="username" name="username" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Şifre</label>
+        <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" type="submit" style="width:100%;">Giriş yap</button>
+    </form>
+    <p class="small muted" style="margin-top:1rem;">Hesabın yok mu? <a href="/register">Kayıt ol</a></p>
+  </div>
+</section>
 {% endblock %}

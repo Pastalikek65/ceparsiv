@@ -3,33 +3,29 @@
 {% block title %}{{ item.title }} — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <header>
-    <h2>{{ item.title }}</h2>
-    <small>{{ item.type }}</small>
-  </header>
-
-  {% if item_tags %}
-  <p>
-    {% for tag in item_tags %}
-    <span class="secondary">{{ tag.name }}</span>
-    {% endfor %}
-  </p>
-  {% endif %}
-
-  {% if item.url %}
-  <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
-  {% endif %}
-
-  <div class="md-body">{{ rendered_body|safe }}</div>
-
-  <footer>
-    <small>
-      Oluşturuldu: {{ item.created_at.strftime("%Y-%m-%d %H:%M") }} ·
-      Güncellendi: {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}
-    </small>
-  </footer>
-</article>
-
-<p style="margin-top:1rem;"><small>CepArsiv üzerinde paylaşıldı.</small></p>
+<div class="grid-2">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap;">
+      <span class="cat-num">{{ "%04d"|format(item.id) }}</span>
+      <span class="stamp">{{ item.type }}</span>
+    </div>
+    <h1 style="margin:.6rem 0 .2rem;font-size:1.5rem;">{{ item.title }}</h1>
+    <div class="small muted mono" style="margin-bottom:1rem;">
+      Oluşturuldu {{ item.created_at.strftime("%Y-%m-%d %H:%M") }}
+      {% if item.updated_at != item.created_at %} · Güncellendi {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}{% endif %}
+    </div>
+    {% if item.url %}
+    <p style="margin:.4rem 0 1rem;"><a href="{{ item.url }}" rel="noopener" target="_blank">{{ item.url }}</a></p>
+    {% endif %}
+    <div class="md-body">{{ rendered_body|safe }}</div>
+    {% if item_tags %}
+    <p style="margin-top:1.2rem;">
+      {% for tag in item_tags %}
+      <span class="tag-pill">#{{ tag.name }}</span>
+      {% endfor %}
+    </p>
+    {% endif %}
+  </div>
+</div>
+<p class="footer-note mono">CepArsiv üzerinde paylaşıldı</p>
 {% endblock %}

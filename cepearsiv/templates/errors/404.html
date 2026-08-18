@@ -3,9 +3,13 @@
 {% block title %}404 — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <h2>404 - Sayfa Bulunamadı</h2>
-  <p>Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.</p>
-  <p><a href="/" role="button">Ana sayfaya dön</a></p>
-</article>
+<section class="auth-wrap">
+  <div class="card auth-card">
+    <div class="empty" style="margin:0 0 1rem;">
+      <p class="big">404 — Sayfa bulunamadı</p>
+      <p>Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.</p>
+    </div>
+    <a class="btn" href="/" style="width:100%;">Ana sayfaya dön</a>
+  </div>
+</section>
 {% endblock %}

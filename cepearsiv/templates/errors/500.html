@@ -3,13 +3,16 @@
 {% block title %}500 — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <h2>500 - Sunucu Hatası</h2>
-  <p>Beklenmedik bir sorun oluştu. Lütfen daha sonra tekrar deneyin.</p>
-  {% if detail %}
-  <hr>
-  <pre style="white-space:pre-wrap;">{{ detail }}</pre>
-  {% endif %}
-  <p><a href="/" role="button" class="secondary">Ana sayfaya dön</a></p>
-</article>
+<section class="auth-wrap">
+  <div class="card auth-card">
+    <div class="empty" style="margin:0 0 1rem;">
+      <p class="big">500 — Sunucu hatası</p>
+      <p>Beklenmedik bir sorun oluştu. Lütfen daha sonra tekrar deneyin.</p>
+    </div>
+    {% if detail %}
+    <pre class="raw-token" style="white-space:pre-wrap;">{{ detail }}</pre>
+    {% endif %}
+    <a class="btn" href="/" style="width:100%;margin-top:1rem;">Ana sayfaya dön</a>
+  </div>
+</section>
 {% endblock %}
