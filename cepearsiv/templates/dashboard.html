@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — CepArsiv{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Hoş geldin, {{ user.username }}</h1>
+  <a class="btn" href="/items/new">+ Yeni kayıt</a>
+</div>
+
+<div class="stats-row">
+  <div class="stat"><span class="num">{{ stats.total }}</span><span class="label">Toplam kayıt</span></div>
+  <div class="stat"><span class="num">{{ stats.last7 }}</span><span class="label">Son 7 gün</span></div>
+  <div class="stat"><span class="num">{{ stats.favorites }}</span><span class="label">Favori</span></div>
+  <div class="stat"><span class="num">{{ stats.tags }}</span><span class="label">Etiket</span></div>
+</div>
+
+<section class="card" style="margin-bottom:1.25rem;">
+  <h3 style="margin-top:0;">Hızlı kayıt</h3>
+  <form method="post" action="/items" style="display:flex;gap:.6rem;flex-wrap:wrap;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input class="form-control" type="text" name="title" placeholder="Başlık" maxlength="200" required style="flex:1;min-width:180px;">
+    <select class="form-control" name="type" style="width:auto;">
+      <option value="note">Not</option>
+      <option value="bookmark">Yer imi</option>
+      <option value="snippet">Snippet</option>
+    </select>
+    <button class="btn" type="submit">Kaydet</button>
+  </form>
+</section>
+
+<section>
+  <div class="section-title">
+    <h2>Son eklenenler</h2>
+    <a class="small" href="/items">Tümü →</a>
+  </div>
+  {% if recent %}
+  <div id="card-grid">
+    {% for item in recent %}
+    {% include "partials/item_card.html" %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <p class="big">Arşiv henüz boş</p>
+    <p>İlk dizin kartını oluştur — bir not, yer imi ya da kod parçası.</p>
+    <p style="margin-top:1rem;"><a class="btn" href="/items/new">İlk kaydı oluştur</a></p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

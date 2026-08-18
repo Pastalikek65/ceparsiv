@@ -84,7 +84,20 @@ def healthz() -> dict:
 @app.get("/")
 def home(request: Request, session: Session = Depends(get_session)):
     user = get_current_user(request, session)
-    return templates.TemplateResponse(request, "index.html", {"user": user})
+    if user is None:
+        return templates.TemplateResponse(request, "index.html", {"user": None})
+    from cepearsiv.services.dashboard import dashboard_stats
+    from cepearsiv.services.items import list_items
+    from cepearsiv.security import generate_csrf_token
+
+    stats = dashboard_stats(session, user.id)
+    recent, _ = list_items(session, user.id, page=1, page_size=5)
+    csrf_token = request.cookies.get("csrf_token") or generate_csrf_token()
+    return templates.TemplateResponse(
+        request,
+        "dashboard.html",
+        {"user": user, "stats": stats, "recent": recent, "csrf_token": csrf_token},
+    )
 
 
 @app.exception_handler(StarletteHTTPException)

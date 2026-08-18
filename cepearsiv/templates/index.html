@@ -3,13 +3,16 @@
 {% block title %}CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <h1>CepArsiv - Kişisel Bilgi Arşivi</h1>
-  <p>Notlar, yer imleri ve kod parçacıkları tek bir hafif arşivde.</p>
-  {% if user %}
-  <p><a href="/items" role="button">Arşive git</a></p>
-  {% else %}
-  <p><a href="/login" role="button">Giriş</a> <a href="/register" role="button" class="secondary">Kayıt ol</a></p>
-  {% endif %}
-</article>
+<section class="auth-wrap">
+  <div class="auth-brand">Cep<em>Arsiv</em></div>
+  <div class="card auth-card" style="text-align:center;">
+    <h1>Kişisel bilgi arşivi</h1>
+    <p class="muted">Notlar, yer imleri ve kod parçacıkları tek bir hafif arşivde. Veri tamamen sende.</p>
+    <p style="margin-top:1.4rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;">
+      <a class="btn" href="/login">Giriş</a>
+      <a class="btn outline" href="/register">Kayıt ol</a>
+    </p>
+    <p class="small muted" style="margin-top:1.2rem;">Katalog numaralı dizin kartları · FTS5 arama · Paylaşım linkleri · 2FA</p>
+  </div>
+</section>
 {% endblock %}

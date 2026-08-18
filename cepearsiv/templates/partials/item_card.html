@@ -1,16 +1,18 @@
-<article>
-  <header>
-    <strong>
-      <a href="/items/{{ item.id }}">{{ item.title }}</a>
-    </strong>
-    <small>{{ item.type }}</small>
-    {% if item.is_favorite %}<span title="Favori">⭐</span>{% endif %}
-    {% if item.is_archived %}<span title="Arşivde">🗄</span>{% endif %}
-    {% if item.is_deleted %}<span title="Çöpte">🗑</span>{% endif %}
-  </header>
-  {% if item.body %}<p>{{ item.body[:100] }}{% if item.body|length > 100 %}…{% endif %}</p>{% endif %}
-  <footer>
-    <small>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</small>
-    {% if item.url %}<small>· <a href="{{ item.url }}" rel="noopener">{{ item.url[:48] }}</a></small>{% endif %}
-  </footer>
+<article class="card lift stamp-in" style="margin:0 0 .9rem;">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;">
+    <span class="cat-num">{{ "%04d"|format(item.id) }}</span>
+    <span>
+      {% if item.is_favorite %}<span title="Favori" style="margin-right:.4rem;">★</span>{% endif %}
+      {% if item.is_archived %}<span title="Arşivde" style="margin-right:.4rem;">🗄</span>{% endif %}
+      <span class="stamp stamp-{{ 'ok' if item.type == 'bookmark' else ('muted' if item.type == 'snippet' else '') }}">{{ item.type }}</span>
+    </span>
+  </div>
+  <h3 style="margin:.5rem 0 .35rem;font-size:1.05rem;">
+    <a class="card-link" href="/items/{{ item.id }}">{{ item.title }}</a>
+  </h3>
+  {% if item.body %}<p class="muted small" style="margin:.25rem 0 .5rem;">{{ item.body[:120] }}{% if item.body|length > 120 %}…{% endif %}</p>{% endif %}
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;">
+    <span class="small muted mono">{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</span>
+    {% if item.url %}<span class="small"><a href="{{ item.url }}" rel="noopener" target="_blank">{{ item.url[:40] }}</a></span>{% endif %}
+  </div>
 </article>
