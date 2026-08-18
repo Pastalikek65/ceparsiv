@@ -29,3 +29,18 @@
 | V2-C | Paylaşılabilir tekil link: `/share/<token>`, salt okunur, sahibi silebilir | tamamlandı |
 | V2-C | Web clipper bookmarklet: `POST /api/v1/clipper`, duplicate URL dedupe, CORS preflight | tamamlandı |
 | V2-D | İki faktörlü auth: TOTP + SVG QR + 10 hash'lenmiş yedek kod | tamamlandı |
+
+## V3 — frontend yeniden tasarımı (tamamlandı)
+
+| Kapsam |
+|---|
+| "Arşiv Kataloğu" kimliği: IBM Plex Mono + system-ui, damga/cat-num signature, stamp-in animasyon |
+| Tasarım sistemi: `static/css/app.css` token'ları (light/dark/auto), favicon.svg, `base.html` yeniden yazımı |
+| Dashboard: istatistik kartları, hızlı kayıt formu, son eklenenler |
+| Arşiv grid: HTMX load-more (cursor), filtre barı, dizin kartları |
+| Item düzenleme sayfaları + canlı markdown önizleme (`/items/preview`) |
+| Detay sayfası: yan işlem paneli, paylaşım linki kopyalama (`data-copy`) |
+| Canlı arama: debounce HTMX, `<mark>` vurgulu snippet'ler, sayfalama |
+| Etiketler hub'ı, ayarlar sekme navigasyonu, auth/hata sayfaları |
+| Klavye kısayolları (`/`, `n`, `j/k`), tema döngüsü, toast altyapısı |
+| PWA: manifest, service worker (sayfa network-first/statik cache-first), PNG ikonlar |
