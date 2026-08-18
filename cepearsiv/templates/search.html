@@ -11,11 +11,10 @@
   class="filterbar"
   method="get"
   action="/search"
-  hx-get="/search"
+  hx-get="/search?partial=1"
   hx-target="#search-results"
   hx-swap="outerHTML"
   hx-trigger="submit, input changed delay:500ms from:#search-q"
-  hx-include="[name=q],[name=type],[name=tag]"
 >
   <input class="form-control" id="search-q" type="search" name="q" value="{{ q }}" placeholder="Ara…" autocomplete="off" style="flex:1;min-width:180px;">
   <select class="form-control" name="type" aria-label="Tür" style="width:auto;">
@@ -29,14 +28,7 @@
   <button class="btn ghost" type="submit">Ara</button>
 </form>
 
-{% if not searched %}
-<div class="empty">
-  <p class="big">Ne arıyorsun?</p>
-  <p>FTS5 tarafından desteklenen tam metin araması: <span class="mono small">python</span>, <span class="mono small">"django deploy"</span>, <span class="mono small">site:example.com</span></p>
-</div>
-{% else %}
 <div id="search-results">
   {% include "partials/search_results.html" %}
 </div>
-{% endif %}
 {% endblock %}
