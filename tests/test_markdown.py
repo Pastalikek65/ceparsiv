@@ -1,4 +1,5 @@
 from cepearsiv.markdownx import render_markdown
+from tests.conftest import get_csrf, login_client, make_user
 
 
 def test_render_heading_and_list():
@@ -54,3 +55,16 @@ def test_render_link_normal():
     html = render_markdown("[example](https://example.com)")
     assert 'href="https://example.com"' in html
     assert "example</a>" in html
+
+
+def test_preview_returns_rendered_markdown(client, db_session):
+    make_user(db_session, username="prev")
+    login_client(client, "prev")
+    csrf = get_csrf(client, "/items/new")
+    response = client.post(
+        "/items/preview",
+        data={"body": "**kalın** ve `kod`", "csrf_token": csrf},
+    )
+    assert response.status_code == 200
+    assert "<strong>kalın</strong>" in response.text
+    assert "<code>kod</code>" in response.text

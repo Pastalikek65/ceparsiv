@@ -266,6 +266,23 @@ def items_edit(
     return RedirectResponse(f"/items/{item_id}", status_code=302)
 
 
+@router.post("/items/preview")
+def items_preview(
+    request: Request,
+    session: Session = Depends(get_session),
+    body: str = Form(""),
+    csrf_token: str | None = Form(None),
+):
+    user = get_current_user(request, session)
+    if user is None:
+        return templates.TemplateResponse(request, "partials/markdown_preview.html", {"rendered": ""})
+    if not _csrf_ok(request, csrf_token):
+        return templates.TemplateResponse(request, "partials/markdown_preview.html", {"rendered": ""})
+    return templates.TemplateResponse(
+        request, "partials/markdown_preview.html", {"rendered": render_markdown(fix_form_value(body))}
+    )
+
+
 @router.get("/items/{item_id}")
 def items_detail(request: Request, item_id: int, session: Session = Depends(get_session)):
     user = get_current_user(request, session)
