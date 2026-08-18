@@ -3,52 +3,64 @@
 {% block title %}Etiketler — CepArsiv{% endblock %}
 
 {% block content %}
-<header>
-  <h2>Etiketler</h2>
-</header>
+<div class="page-head">
+  <h1>Etiketler</h1>
+  <span class="small muted mono">{{ tags|length }} etiket</span>
+</div>
 
 {% if error is defined and error %}
-<p style="color:var(--color-error);">Hata: {{ error }}</p>
+<div class="alert">{{ error }}</div>
 {% endif %}
 
 {% if tags %}
-<table>
-  <thead>
-    <tr><th>Etiket</th><th>Öğe</th><th>Yeniden adlandır</th><th>Buna birleştir</th></tr>
-  </thead>
-  <tbody>
+<div class="card" style="padding:1.2rem;">
+  <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem;">
     {% for tag, count in tags %}
-    <tr>
-      <td><a href="/items?tag={{ tag.name }}">{{ tag.name }}</a></td>
-      <td>{{ count }}</td>
-      <td>
-        <form method="post" action="/tags/{{ tag.id }}/rename" style="display:flex;gap:.3rem;margin:0;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <input type="text" name="name" value="{{ tag.name }}" aria-label="Yeni ad" style="margin:0;">
-          <button type="submit" class="secondary">Değiştir</button>
-        </form>
-      </td>
-      <td>
-        <form method="post" action="/tags/{{ tag.id }}/merge" style="display:flex;gap:.3rem;margin:0;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <select name="target_id" aria-label="Hedef etiket" style="margin:0;">
-            <option value="" selected disabled>hedef seç</option>
-            {% for other, _ in tags %}
-            {% if other.id != tag.id %}
-            <option value="{{ other.id }}">{{ other.name }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-          <button type="submit" class="contrast">Birleştir</button>
-        </form>
-      </td>
-    </tr>
+    <a class="tag-pill" href="/items?tag={{ tag.name }}" style="font-size:.9rem;padding:.3rem .8rem;">
+      #{{ tag.name }} <span class="small muted">({{ count }})</span>
+    </a>
     {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p><em>Henüz etiket yok.</em></p>
-{% endif %}
+  </div>
 
-<p><a href="/items">← Arşive dön</a></p>
+  <table class="table">
+    <thead>
+      <tr><th>Etiket</th><th>Öğe</th><th>Yeniden adlandır</th><th>Buna birleştir</th></tr>
+    </thead>
+    <tbody>
+      {% for tag, count in tags %}
+      <tr>
+        <td><a href="/items?tag={{ tag.name }}">#{{ tag.name }}</a></td>
+        <td>{{ count }}</td>
+        <td>
+          <form method="post" action="/tags/{{ tag.id }}/rename" style="display:flex;gap:.3rem;margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input class="form-control" type="text" name="name" value="{{ tag.name }}" aria-label="Yeni ad" style="padding:.3rem .5rem;min-width:110px;">
+            <button class="btn ghost small" type="submit">Değiştir</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/tags/{{ tag.id }}/merge" style="display:flex;gap:.3rem;margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <select class="form-control" name="target_id" aria-label="Hedef etiket" style="padding:.3rem .5rem;width:auto;">
+              <option value="" selected disabled>hedef seç</option>
+              {% for other, _ in tags %}
+              {% if other.id != tag.id %}
+              <option value="{{ other.id }}">{{ other.name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            <button class="btn danger outline small" type="submit">Birleştir</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty">
+  <p class="big">Henüz etiket yok</p>
+  <p>Kayıt eklerken virgülle ayırarak etiketleyebilirsin.</p>
+</div>
+{% endif %}
 {% endblock %}
