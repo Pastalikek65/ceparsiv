@@ -43,7 +43,7 @@ def test_web_cursor_follows_next_page(authenticated_client):
 
     _seed_items(authenticated_client, 25)
     html = authenticated_client.get("/items").text
-    match = re.search(r'href="/items\?([^"]*cursor=[^"]*)"', html)
+    match = re.search(r'hx-get="/items\?([^"]*cursor=[^"]*)"', html)
     assert match
     page2_html = authenticated_client.get(f"/items?{match.group(1)}").text
-    assert "cursor=" not in page2_html or "Sonraki" not in page2_html
+    assert "cursor=" not in page2_html or "Daha fazla" not in page2_html

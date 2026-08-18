@@ -102,19 +102,6 @@ def items_list(request: Request, session: Session = Depends(get_session)):
     if has_next and items:
         next_cursor = encode_cursor(items[-1].created_at, items[-1].id)
         next_query = f"{base_query or '?'}cursor={next_cursor}"
-    return _csrf_response(
-        request,
-        "items/list.html",
-        user=user,
-        items=items,
-        filters={
-            "type": item_type or "",
-            "tag": tag or "",
-            "favorite": favorite or False,
-            "archived": archived or False,
-            "deleted": deleted,
-        },
-    )
     context = {
         "user": user,
         "items": items,
