@@ -3,73 +3,77 @@
 {% block title %}{{ item.title }} — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <header>
-    <h2>{{ item.title }}</h2>
-    <small>{{ item.type }}</small>
-    {% if item.is_favorite %}<span title="Favori">⭐</span>{% endif %}
-    {% if item.is_archived %}<span title="Arşivde">🗄</span>{% endif %}
-    {% if item.is_deleted %}<span title="Çöpte">🗑</span>{% endif %}
-  </header>
+<div class="grid-2">
+  <div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap;">
+        <span class="cat-num">{{ "%04d"|format(item.id) }}</span>
+        <span>
+          {% if item.is_favorite %}<span title="Favori" style="margin-right:.4rem;">★</span>{% endif %}
+          {% if item.is_archived %}<span title="Arşivde" style="margin-right:.4rem;">🗄</span>{% endif %}
+          {% if item.is_deleted %}<span title="Çöpte" style="margin-right:.4rem;">🗑</span>{% endif %}
+          <span class="stamp">{{ item.type }}</span>
+        </span>
+      </div>
+      <h1 style="margin:.6rem 0 .2rem;font-size:1.5rem;">{{ item.title }}</h1>
+      <div class="small muted mono" style="margin-bottom:1rem;">
+        Oluşturuldu {{ item.created_at.strftime("%Y-%m-%d %H:%M") }}
+        {% if item.updated_at != item.created_at %} · Güncellendi {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}{% endif %}
+      </div>
+      {% if item.url %}
+      <p style="margin:.4rem 0 1rem;">
+        <a href="{{ item.url }}" rel="noopener" target="_blank">{{ item.url }}</a>
+      </p>
+      {% endif %}
+      <div class="md-body">{{ rendered_body|safe }}</div>
+      {% if item_tags %}
+      <p style="margin-top:1.2rem;">
+        {% for tag in item_tags %}
+        <a class="tag-pill" href="/items?tag={{ tag.name }}">#{{ tag.name }}</a>
+        {% endfor %}
+      </p>
+      {% endif %}
+    </div>
+  </div>
 
-  {% if item_tags %}
-  <p>
-    {% for tag in item_tags %}
-    <a href="/items?tag={{ tag.name }}" class="secondary" role="button">{{ tag.name }}</a>
-    {% endfor %}
-  </p>
-  {% endif %}
+  <aside class="card aside">
+    <h3 style="margin-top:0;">İşlemler</h3>
+    {% if not item.is_deleted %}
+    <a class="btn small" href="/items/{{ item.id }}/edit" style="margin-bottom:.6rem;width:100%;">Düzenle</a>
+    <form method="post" action="/items/{{ item.id }}/toggle/favorite" style="margin:.3rem 0;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn ghost small" type="submit" style="width:100%;">{% if item.is_favorite %}★ Favoriden çıkar{% else %}☆ Favorile{% endif %}</button>
+    </form>
+    <form method="post" action="/items/{{ item.id }}/toggle/archived" style="margin:.3rem 0;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn ghost small" type="submit" style="width:100%;">{% if item.is_archived %}Arşivden çıkar{% else %}🗄 Arşivle{% endif %}</button>
+    </form>
+    <form method="post" action="/items/{{ item.id }}/toggle/deleted" style="margin:.3rem 0 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn danger outline small" type="submit" style="width:100%;">Sil</button>
+    </form>
+    {% else %}
+    <form method="post" action="/items/{{ item.id }}/restore" style="margin:0 0 1rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn small" type="submit" style="width:100%;">Geri Al</button>
+    </form>
+    {% endif %}
 
-  {% if item.url %}
-  <p><a href="{{ item.url }}" rel="noopener">{{ item.url }}</a></p>
-  {% endif %}
-
-  <div class="md-body">{{ rendered_body|safe }}</div>
-
-  <footer>
-    <small>
-      Oluşturuldu: {{ item.created_at.strftime("%Y-%m-%d %H:%M") }} ·
-      Güncellendi: {{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}
-    </small>
-  </footer>
-</article>
-
-<div style="margin-top:.5rem;border:1px solid var(--muted-border-color);border-radius:var(--border-radius);padding:.5rem .75rem;">
-  {% if share_url %}
-  <p style="margin:0 0 .25rem;"><small><strong>Paylaşım bağlantısı:</strong> <a href="{{ share_url }}">{{ share_url }}</a></small></p>
-  <form method="post" action="/items/{{ item.id }}/share/delete" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="secondary">Bağlantıyı kaldır</button>
-  </form>
-  {% else %}
-  <form method="post" action="/items/{{ item.id }}/share" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="secondary">Paylaşım bağlantısı oluştur</button>
-  </form>
-  {% endif %}
+    <hr style="border:none;border-top:1px solid var(--line);margin:1rem 0;">
+    <h4 style="margin:.5rem 0;">Paylaşım</h4>
+    {% if share_url %}
+    <p class="small muted">Paylaşım bağlantısı:</p>
+    <div class="raw-token" data-copy="{{ share_url }}" title="Kopyalamak için tıkla">{{ share_url }}</div>
+    <form method="post" action="/items/{{ item.id }}/share/delete" style="margin:.6rem 0 0;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn ghost small" type="submit">Bağlantıyı kaldır</button>
+    </form>
+    {% else %}
+    <form method="post" action="/items/{{ item.id }}/share">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn outline small" type="submit">Paylaşım bağlantısı oluştur</button>
+    </form>
+    {% endif %}
+  </aside>
 </div>
-
-<div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem;">
-  {% if not item.is_deleted %}
-  <form method="post" action="/items/{{ item.id }}/toggle/favorite" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="secondary">{% if item.is_favorite %}Favoriden çıkar{% else %}Favorile{% endif %}</button>
-  </form>
-  <form method="post" action="/items/{{ item.id }}/toggle/archived" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="secondary">{% if item.is_archived %}Arşivden çıkar{% else %}Arşivle{% endif %}</button>
-  </form>
-  <form method="post" action="/items/{{ item.id }}/toggle/deleted" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="contrast">Sil</button>
-  </form>
-  {% else %}
-  <form method="post" action="/items/{{ item.id }}/restore" style="margin:0;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit">Geri Al</button>
-  </form>
-  {% endif %}
-</div>
-
-<p style="margin-top:1rem;"><a href="/items">← Listeye dön</a></p>
 {% endblock %}
