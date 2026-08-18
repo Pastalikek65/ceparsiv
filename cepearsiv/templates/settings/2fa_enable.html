@@ -3,19 +3,23 @@
 {% block title %}2FA Etkinleştir — CepArsiv{% endblock %}
 
 {% block content %}
-<article style="max-width:480px;margin:2rem auto;">
-  <h2>İki faktörlü auth</h2>
-  <p>Google Authenticator gibi bir TOTP uygulamasıyla girişlerinizi ikinci bir adımla koruyun.</p>
+<div class="page-head">
+  <h1>İki faktörlü kimlik doğrulama</h1>
+</div>
+{% include "partials/settings_nav.html" %}
+
+<div class="card" style="max-width:520px;">
+  <p class="muted">Google Authenticator gibi bir TOTP uygulamasıyla girişlerinizi ikinci bir adımla koruyun.</p>
   {% if error %}
-  <p style="color:var(--color-error);">{{ error }}</p>
+  <div class="alert">{{ error }}</div>
   {% endif %}
   <form method="post" action="/settings/2fa/enable">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="password">Hesap şifreniz
-      <input type="password" id="password" name="password" required>
-    </label>
-    <button type="submit">Başla</button>
+    <div class="field">
+      <label for="password">Hesap şifreniz</label>
+      <input class="form-control" type="password" id="password" name="password" required>
+    </div>
+    <button class="btn" type="submit">Başla</button>
   </form>
-  <p><a href="/account">← Hesaba dön</a></p>
-</article>
+</div>
 {% endblock %}

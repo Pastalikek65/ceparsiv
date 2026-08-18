@@ -3,15 +3,18 @@
 {% block title %}Yedek Kodlar — CepArsiv{% endblock %}
 
 {% block content %}
-<article style="max-width:480px;margin:2rem auto;">
-  <h2>Yedek kodlar</h2>
+<div class="page-head">
+  <h1>Yedek kodlar</h1>
+</div>
+
+<div class="card" style="max-width:520px;">
   <p><strong>Bu kodları şimdi kaydedin.</strong> Her biri tek kullanımlıktır; telefonunuzu kaybederseniz giriş için tek yolunuz bunlar. Bu sayfadan çıktıktan sonra bir daha gösterilmeyecekler.</p>
-  <ul>
+  <div class="codes-grid">
     {% for code in backup_codes %}
-    <li><code>{{ code }}</code></li>
+    <code>{{ code }}</code>
     {% endfor %}
-  </ul>
-  <p>2FA artık etkin. Bundan sonra girişte kod istenecek.</p>
-  <p><a href="/account" role="button">Anladım, hesaba dön</a></p>
-</article>
+  </div>
+  <p class="small" style="margin-top:1rem;">2FA artık etkin. Bundan sonra girişte kod istenecek.</p>
+  <a class="btn" href="/account">Anladım, hesaba dön</a>
+</div>
 {% endblock %}

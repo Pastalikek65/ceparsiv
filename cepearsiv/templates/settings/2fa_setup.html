@@ -3,22 +3,35 @@
 {% block title %}2FA Kurulumu — CepArsiv{% endblock %}
 
 {% block content %}
-<article style="max-width:560px;margin:2rem auto;">
-  <h2>Karekodu tarayın</h2>
-  <p>Authenticator uygulamanıza ekleyin, sonra aşağıdaki kodu doğrulayın.</p>
+<div class="page-head">
+  <h1>Karekodu tarayın</h1>
+</div>
+{% include "partials/settings_nav.html" %}
+
+<div class="card" style="max-width:560px;">
+  <p class="muted">Authenticator uygulamanıza ekleyin, sonra aşağıdaki kodu doğrulayın.</p>
   {% if error %}
-  <p style="color:var(--color-error);">{{ error }}</p>
+  <div class="alert">{{ error }}</div>
   {% endif %}
-  <div style="text-align:center;">{{ qr_svg | safe }}</div>
-  <p><small>Sır: <code>{{ secret }}</code></small></p>
-  <p><small>URI: <code style="word-break:break-all;">{{ otpauth_uri }}</code></small></p>
+  <div style="text-align:center;margin:1rem 0;">
+    <div class="qr-box">{{ qr_svg | safe }}</div>
+  </div>
+  <div class="field">
+    <label class="small" for="secret">Sır</label>
+    <div class="raw-token" id="secret" data-copy="{{ secret }}" title="Kopyalamak için tıkla">{{ secret }}</div>
+  </div>
+  <div class="field">
+    <label class="small">URI</label>
+    <div class="raw-token" data-copy="{{ otpauth_uri }}" title="Kopyalamak için tıkla" style="font-size:.72rem;">{{ otpauth_uri }}</div>
+  </div>
   <form method="post" action="/settings/2fa/verify">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="code">6 haneli kod
-      <input type="text" id="code" name="code" autocomplete="off" required>
-    </label>
-    <button type="submit">Etkinleştir</button>
+    <div class="field">
+      <label for="code">6 haneli kod</label>
+      <input class="form-control" type="text" id="code" name="code" autocomplete="off" required style="max-width:200px;font-family:var(--mono);letter-spacing:.3em;">
+    </div>
+    <button class="btn" type="submit">Etkinleştir</button>
   </form>
-  <p><a href="/settings/2fa">← Vazgeç</a></p>
-</article>
+  <p style="margin-top:1rem;"><a href="/settings/2fa">← Vazgeç</a></p>
+</div>
 {% endblock %}

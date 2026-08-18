@@ -3,22 +3,27 @@
 {% block title %}2FA Devre Dışı — CepArsiv{% endblock %}
 
 {% block content %}
-<article style="max-width:480px;margin:2rem auto;">
-  <h2>2FA etkin</h2>
-  <p>Devre dışı bırakmak için şifrenizi ve güncel kodunuzu (veya bir yedek kodu) girin.</p>
+<div class="page-head">
+  <h1>2FA etkin</h1>
+</div>
+{% include "partials/settings_nav.html" %}
+
+<div class="card" style="max-width:520px;">
+  <p class="muted">Devre dışı bırakmak için şifrenizi ve güncel kodunuzu (veya bir yedek kodu) girin.</p>
   {% if error %}
-  <p style="color:var(--color-error);">{{ error }}</p>
+  <div class="alert">{{ error }}</div>
   {% endif %}
   <form method="post" action="/settings/2fa/disable">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <label for="password">Şifre
-      <input type="password" id="password" name="password" required>
-    </label>
-    <label for="code">TOTP veya yedek kod
-      <input type="text" id="code" name="code" autocomplete="off" required>
-    </label>
-    <button type="submit" class="contrast">Devre dışı bırak</button>
+    <div class="field">
+      <label for="password">Şifre</label>
+      <input class="form-control" type="password" id="password" name="password" required>
+    </div>
+    <div class="field">
+      <label for="code">TOTP veya yedek kod</label>
+      <input class="form-control" type="text" id="code" name="code" autocomplete="off" required>
+    </div>
+    <button class="btn danger" type="submit">Devre dışı bırak</button>
   </form>
-  <p><a href="/settings/2fa">← Ayarlar</a> · <a href="/account">Hesap</a></p>
-</article>
+</div>
 {% endblock %}

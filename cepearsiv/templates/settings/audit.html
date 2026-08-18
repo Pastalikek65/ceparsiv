@@ -3,32 +3,35 @@
 {% block title %}Denetim Kaydı — CepArsiv{% endblock %}
 
 {% block content %}
-<header>
-  <h2>Denetim Kaydı</h2>
-  <p><small>Son 100 kayıt gösterilir.</small></p>
-</header>
+<div class="page-head">
+  <h1>Denetim Kaydı</h1>
+  <span class="small muted">Son 100 kayıt gösterilir.</span>
+</div>
+{% include "partials/settings_nav.html" %}
 
 {% if audit_logs %}
-<table>
-  <thead>
-    <tr><th>Zaman</th><th>Action</th><th>Entity</th><th>ID</th><th>Detail</th><th>IP</th></tr>
-  </thead>
-  <tbody>
-    {% for row in audit_logs %}
-    <tr>
-      <td><small>{{ row.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</small></td>
-      <td><code>{{ row.action }}</code></td>
-      <td>{{ row.entity_type or "—" }}</td>
-      <td>{{ row.entity_id or "—" }}</td>
-      <td>{{ row.detail or "—" }}</td>
-      <td><small>{{ row.ip or "—" }}</small></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card" style="padding:0 1.1rem 1.1rem;">
+  <table class="table">
+    <thead>
+      <tr><th>Zaman</th><th>Action</th><th>Entity</th><th>ID</th><th>Detail</th><th>IP</th></tr>
+    </thead>
+    <tbody>
+      {% for row in audit_logs %}
+      <tr>
+        <td><span class="small mono">{{ row.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</span></td>
+        <td><span class="mono small">{{ row.action }}</span></td>
+        <td>{{ row.entity_type or "—" }}</td>
+        <td>{{ row.entity_id or "—" }}</td>
+        <td>{{ row.detail or "—" }}</td>
+        <td><span class="small">{{ row.ip or "—" }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p><em>No audit logs</em></p>
+<div class="empty">
+  <p class="big">Denetim kaydı boş</p>
+</div>
 {% endif %}
-
-<p><a href="/account">← Hesaba dön</a></p>
 {% endblock %}

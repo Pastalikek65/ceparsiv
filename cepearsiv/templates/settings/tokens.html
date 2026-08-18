@@ -3,57 +3,63 @@
 {% block title %}API Tokenları — CepArsiv{% endblock %}
 
 {% block content %}
-<header>
-  <h2>API Tokenları</h2>
-</header>
+<div class="page-head">
+  <h1>API Tokenlar</h1>
+</div>
+{% include "partials/settings_nav.html" %}
 
 {% if error %}
-<p><strong>{{ error }}</strong></p>
+<div class="alert">{{ error }}</div>
 {% endif %}
 
 {% if raw_shown %}
-<article>
-  <p><strong>Yeni token oluşturuldu. Aşağıdaki değeri kopyala; yalnızca bir kez gösterilir:</strong></p>
-  <pre style="white-space:pre-wrap; word-break:break-all;">{{ raw_shown }}</pre>
-</article>
+<div class="card settings-card">
+  <p class="small"><strong>Yeni token oluşturuldu. Aşağıdaki değeri kopyala; yalnızca bir kez gösterilir:</strong></p>
+  <div class="raw-token" data-copy="{{ raw_shown }}" title="Kopyalamak için tıkla">{{ raw_shown }}</div>
+</div>
 {% endif %}
 
-<form method="post" action="/settings/tokens">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-  <div style="display:flex; gap:.5rem; align-items:flex-end;">
-    <label style="flex:1;">Token adı
-      <input type="text" name="name" placeholder="ör. telefon-uygulamasi" required>
-    </label>
-    <button type="submit">Yeni Token</button>
-  </div>
-</form>
+<div class="card settings-card">
+  <form method="post" action="/settings/tokens" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div style="flex:1;min-width:200px;">
+      <label class="small" for="token-name">Token adı</label>
+      <input class="form-control" id="token-name" type="text" name="name" placeholder="ör. telefon-uygulamasi" required>
+    </div>
+    <button class="btn" type="submit">Yeni Token</button>
+  </form>
+</div>
 
 {% if tokens %}
-<table>
-  <thead>
-    <tr><th>Ad</th><th>Prefix</th><th>Oluşturulma</th><th>Son kullanım</th><th></th></tr>
-  </thead>
-  <tbody>
-    {% for token in tokens %}
-    <tr>
-      <td>{{ token.name }}</td>
-      <td><code>{{ token.prefix }}…</code></td>
-      <td>{{ token.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
-      <td>{{ token.last_seen_at.strftime("%Y-%m-%d %H:%M") if token.last_seen_at else "—" }}</td>
-      <td>
-        <form method="post" action="/settings/tokens/{{ token.id }}/delete" style="margin:0;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="contrast">Sil</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card settings-card" style="padding:0 1.1rem 1.1rem;">
+  <table class="table">
+    <thead>
+      <tr><th>Ad</th><th>Prefix</th><th>Oluşturulma</th><th>Son kullanım</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for token in tokens %}
+      <tr>
+        <td>{{ token.name }}</td>
+        <td><span class="mono small">{{ token.prefix }}…</span></td>
+        <td><span class="small mono">{{ token.created_at.strftime("%Y-%m-%d %H:%M") }}</span></td>
+        <td><span class="small mono">{{ token.last_seen_at.strftime("%Y-%m-%d %H:%M") if token.last_seen_at else "—" }}</span></td>
+        <td>
+          <form method="post" action="/settings/tokens/{{ token.id }}/delete" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn danger outline small" type="submit">Sil</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p><em>Henüz token yok.</em></p>
+<div class="empty">
+  <p class="big">Henüz token yok</p>
+  <p>API erişimi için bir token oluştur.</p>
+</div>
 {% endif %}
 
-<p><small>Kullanım: <code>curl -H "Authorization: Bearer &lt;token&gt;" http://127.0.0.1:8000/api/v1/items</code></small></p>
-<p><a href="/account">← Hesaba dön</a></p>
+<p class="small muted">Kullanım: <span class="mono">curl -H "Authorization: Bearer &lt;token&gt;" http://127.0.0.1:8000/api/v1/items</span></p>
 {% endblock %}

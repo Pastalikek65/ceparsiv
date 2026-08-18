@@ -3,12 +3,23 @@
 {% block title %}Hesap — CepArsiv{% endblock %}
 
 {% block content %}
-<article>
-  <h2>Hoş geldin, {{ user.username }}</h2>
-  <p><a href="/items">Arşivim</a> · <a href="/search">Arama</a> · <a href="/settings/2fa">2FA ayarları</a> · <a href="/settings/tokens">API token'lar</a> · <a href="/settings/audit">Audit log</a></p>
+<div class="page-head">
+  <h1>Ayarlar</h1>
+</div>
+{% include "partials/settings_nav.html" %}
+
+<div class="card settings-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0 0 .2rem;">{{ user.username }}</h2>
+      <span class="small muted">Üyelik: {{ user.created_at.strftime("%Y-%m-%d") }}</span>
+    </div>
+    <span class="stamp {{ 'stamp-ok' if user.otp_enabled else 'stamp-muted' }}">{{ "2FA açık" if user.otp_enabled else "2FA kapalı" }}</span>
+  </div>
+  <hr style="border:none;border-top:1px solid var(--line);margin:1rem 0;">
   <form method="post" action="/logout">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit">Çıkış yap</button>
+    <button class="btn danger outline" type="submit">Çıkış yap</button>
   </form>
-</article>
+</div>
 {% endblock %}

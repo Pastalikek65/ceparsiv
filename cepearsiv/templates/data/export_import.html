@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Veri Yönetimi — CepArsiv{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Veri Yönetimi</h1>
+</div>
+{% include "partials/settings_nav.html" %}
+
+{% if error %}
+<div class="alert">{{ error }}</div>
+{% endif %}
+{% if message %}
+<div class="alert ok">{{ message }}</div>
+{% endif %}
+
+<div class="card settings-card">
+  <h3 style="margin-top:0;">Export</h3>
+  <p class="muted small">Tüm itemlarını (silinmişler hariç) JSON dosyası olarak indir.</p>
+  <form method="post" action="/settings/data/export">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button class="btn" type="submit">Export Data</button>
+  </form>
+</div>
+
+<div class="card settings-card">
+  <h3 style="margin-top:0;">Import</h3>
+  <p class="muted small">En fazla 10 MB ve 5000 item. Slug çakışmaları <span class="mono">-import-N</span> eki alır.</p>
+  <form method="post" action="/settings/data/import" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label class="small" for="import-file">JSON dosyası</label>
+      <input class="form-control" type="file" id="import-file" name="file" accept="application/json,.json" required>
+    </div>
+    <button class="btn" type="submit">Import</button>
+  </form>
+</div>
+
+<div class="card settings-card">
+  <h3 style="margin-top:0;">SQLite Yedek</h3>
+  <p class="muted small"><span class="mono">python scripts/backup.py</span> komutu <span class="mono">data/backups/</span> altına tam kopya alır.</p>
+</div>
+{% endblock %}

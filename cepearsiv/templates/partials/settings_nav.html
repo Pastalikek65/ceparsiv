@@ -1,0 +1,7 @@
+<nav class="tabs">
+  <a href="/account" {% if active == "account" %}class="active"{% endif %}>Hesap</a>
+  <a href="/settings/2fa" {% if active == "2fa" %}class="active"{% endif %}>2FA</a>
+  <a href="/settings/tokens" {% if active == "tokens" %}class="active"{% endif %}>API Tokenlar</a>
+  <a href="/settings/audit" {% if active == "audit" %}class="active"{% endif %}>Denetim</a>
+  <a href="/settings/data" {% if active == "data" %}class="active"{% endif %}>Veri</a>
+</nav>
